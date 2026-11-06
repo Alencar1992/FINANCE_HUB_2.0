@@ -191,3 +191,16 @@ test('script privado, sem planilha e credenciais hardcoded',()=>{
   assert.equal(manifest.webapp.executeAs,'USER_DEPLOYING');
   assert.doesNotMatch(code,/docs\.google\.com\/spreadsheets\/d\//);
 });
+
+test('Scripts de formulário e dashboard têm JavaScript válido',()=>{
+  const forms=source('apps-script/Forms.html');
+  const dashboard=source('apps-script/Index.html');
+  const formJs=forms.match(/<script>([\s\S]*?)<\/script>/)?.[1];
+  const dashJs=dashboard.match(/<script>([\s\S]*?)<\/script>/)?.[1];
+  assert.ok(formJs&&dashJs);
+  assert.doesNotThrow(()=>new vm.Script(formJs));
+  assert.doesNotThrow(()=>new vm.Script(dashJs));
+  assert.match(dashboard,/fhInclude_\('Forms'\)/);
+  assert.match(dashboard,/Nenhum vencimento cadastrado/);
+  assert.match(forms,/fh2c-tx-type/);
+});
