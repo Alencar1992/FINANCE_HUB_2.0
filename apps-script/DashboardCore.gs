@@ -150,7 +150,7 @@ function fhBuildDashboard_(tables, options) {
   var near = obligations.filter(function(item) {
     return item.due <= nextWeek;
   });
-  var alerts = near.slice(0, 10).map(function(item) {
+  var alerts = near.slice(0, 8).map(function(item) {
     var overdue = item.due < today;
     return {
       id: item.id,
