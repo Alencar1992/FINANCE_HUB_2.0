@@ -1,9 +1,10 @@
-name: Validar conexão HML (estática)
+name: Validar FINANCE HUB HML (estático)
 on:
   pull_request:
   push:
     branches:
       - feat/apps-script-sheets-hml
+      - feat/dashboard-executivo-hml
 
 permissions:
   contents: read
@@ -16,5 +17,5 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: '22'
-      - name: Testes de estrutura e segurança
+      - name: Testes de estrutura, cálculos e segurança
         run: node --test tests/*.test.mjs
