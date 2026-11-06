@@ -109,7 +109,7 @@ h2{font-size:15px;letter-spacing:-.035em;margin:0}
     <div id="alert-items"></div>
   </div>
   <main>
-    <div class="envline"><span class="envbadge">HML · HOMOLOGAÇÃO</span><span class="readonly"> <span aria-hidden="true">●</span> Somente leitura</span></div>
+    <div class="envline"><span class="envbadge">HML · HOMOLOGAÇÃO</span><span class="readonly" id="hml-mode-label"> <span aria-hidden="true">●</span> HML · cadastro protegido</span></div>
     <button class="banner safe" id="main-alert" type="button">
       <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M18 8a6 6 0 0 0-12 0c0 7-3 7-3 9h18c0-2-3-2-3-9"/></svg>
       <span class="bannertext" id="main-alert-text">Conectando ao Google Sheets…</span><span class="chev">›</span>
@@ -140,6 +140,7 @@ h2{font-size:15px;letter-spacing:-.035em;margin:0}
     <div class="section-title"><h2>Suas metas</h2><span class="muted">Objetivos registrados</span></div>
     <section class="card" id="goal-list"><div class="empty">Aguardando consulta…</div></section>
     <p class="notice" id="disclaimer">Os totais são calculados a partir da base HML. Esta versão não cadastra nem altera transações, e a projeção considera apenas obrigações já registradas.</p>
+  <?!= fhInclude_('Forms') ?>
   </main>
   <nav class="footer" aria-label="Menu principal">
     <button class="navitem active" aria-current="page" data-nav="Início"><svg viewBox="0 0 24 24"><path d="m3 10 9-7 9 7v10H3z"/><path d="M9 20v-7h6v7"/></svg>Início</button>
@@ -223,7 +224,7 @@ h2{font-size:15px;letter-spacing:-.035em;margin:0}
     dot.textContent = alerts.length > 9 ? '9+' : String(alerts.length);
     if (!alerts.length) {
       alertItems.appendChild(el('div','empty','Nenhum vencimento em atraso ou nos próximos sete dias.'));
-      text('main-alert-text','Nenhum vencimento próximo nos próximos 7 dias');
+      text('main-alert-text',data.isEmpty?'Nenhum vencimento cadastrado':'Nenhum vencimento nos próximos 7 dias');
       banner.classList.add('safe');
       return;
     }
@@ -285,8 +286,8 @@ h2{font-size:15px;letter-spacing:-.035em;margin:0}
     });
 
     text('disclaimer', data.isEmpty
-      ? 'A base de homologação não possui registros financeiros. Os valores R$ 0,00 são reais para esta base vazia, não são números fictícios. Nesta fase, nenhuma alteração é permitida.'
-      : 'Somente leitura · HML. Entradas e saídas exibem caixa efetivado na competência selecionada. O saldo e o livre projetado são valores atuais; os compromissos incluem apenas contas, faturas e parcelas sem cartão registradas. Não há sincronização bancária automática.');
+      ? 'Base de homologação vazia. Os valores zerados são reais para a HML, sem simulação. Registros de teste só podem ser criados após habilitação controlada.'
+      : 'Dashboard HML · leitura de caixa efetivado na competência selecionada. O saldo e o livre projetado são valores atuais; os compromissos incluem apenas contas, faturas e parcelas sem cartão registradas. Não há sincronização bancária automática.');
     if(data.warnings && data.warnings.length)toast('Existem movimentações não efetivadas que não entram nos totais.');
   }
   function load(month){
@@ -316,10 +317,15 @@ h2{font-size:15px;letter-spacing:-.035em;margin:0}
   monthPicker.addEventListener('change',function(){if(monthPicker.value)load(monthPicker.value);});
   document.querySelectorAll('[data-nav]').forEach(function(button){
     button.addEventListener('click',function(){
-      if(button.getAttribute('data-nav')==='Início'){window.scrollTo({top:0,behavior:'smooth'});return;}
+      var target=button.getAttribute('data-nav');
+      if(typeof window.fhOpenModule==='function' && window.fhOpenModule(target)){
+        if(target==='Início')window.scrollTo({top:0,behavior:'smooth'});
+        return;
+      }
       toast('Módulo '+button.getAttribute('data-nav')+' será integrado em outra fase. Dashboard: somente leitura.');
     });
   });
+  window.fhRefreshDashboard = function(){load(monthPicker.value);};
   load('');
 })();
 </script>
