@@ -204,3 +204,18 @@ test('Scripts de formulário e dashboard têm JavaScript válido',()=>{
   assert.match(dashboard,/Nenhum vencimento cadastrado/);
   assert.match(forms,/fh2c-tx-type/);
 });
+
+test('diagnóstico de integridade identifica movimento pendente sem alterar células',()=>{
+  const {ctx,sheets}=buildMock();
+  vm.runInContext(source('apps-script/IntegrityService.gs'),ctx);
+  assert.equal(ctx.saveHmlAccount(baseAccount).status,'SAVED');
+  assert.equal(ctx.saveHmlTransaction(baseTransaction).status,'SAVED');
+  const ok=ctx.fh2cIntegrity_();
+  assert.equal(ok.status,'INTEGRITY_OK');
+  assert.equal(ok.transactionsChecked,1);
+  assert.equal(ok.missingMovements,0);
+  sheets.MOVIMENTOS_CONTA.data[1][8]='PENDENTE';
+  const warning=ctx.fh2cIntegrity_();
+  assert.equal(warning.status,'INTEGRITY_REVIEW_REQUIRED');
+  assert.equal(warning.pendingTransactions,1);
+});
