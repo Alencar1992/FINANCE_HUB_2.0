@@ -1,0 +1,26 @@
+# Arquivos locais de autenticação e vínculo do Apps Script
+.clasp.json
+.clasprc.json
+.clasp.local.json
+.env
+.env.*
+!.env.example
+
+# Dados de usuários, registros, backups ou relatórios nunca são versionados
+data/
+dados/
+backups/
+exports/
+relatorios/
+*.csv
+*.xlsx
+*.xls
+*.sqlite
+*.db
+credentials*.json
+service-account*.json
+*.pem
+*.key
+
+node_modules/
+.DS_Store
