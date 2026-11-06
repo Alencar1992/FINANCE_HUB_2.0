@@ -224,7 +224,7 @@ h2{font-size:15px;letter-spacing:-.035em;margin:0}
     dot.textContent = alerts.length > 9 ? '9+' : String(alerts.length);
     if (!alerts.length) {
       alertItems.appendChild(el('div','empty','Nenhum vencimento em atraso ou nos próximos sete dias.'));
-      text('main-alert-text',data.isEmpty?'Nenhum vencimento cadastrado':'Nenhum vencimento nos próximos 7 dias');
+      text('main-alert-text',data.stats.totalObligations===0?'Nenhum vencimento cadastrado':'Nenhum vencimento nos próximos 7 dias');
       banner.classList.add('safe');
       return;
     }
