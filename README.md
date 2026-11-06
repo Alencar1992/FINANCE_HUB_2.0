@@ -38,3 +38,14 @@ node --test tests/*.test.mjs
 ## Segurança
 
 A primeira fase NÃO grava, exclui, altera ou fecha lançamentos. A implantação do Web App deve ser **Somente eu** e **Executar como eu**. Quando se executa como proprietário, `getEffectiveUser()` não identifica o visitante; a proteção depende da restrição de implantação. A interface Executivo aprovada será conectada depois.
+
+
+## Fase 2B — Dashboard Executivo HML (em validação)
+
+A branch \`feat/dashboard-executivo-hml\` adiciona o Dashboard mobile-first preto e azul usando o mesmo projeto Apps Script e a mesma base HML, **somente para leitura**.
+
+Os indicadores são derivados de \`CONTAS\`, \`MOVIMENTOS_CONTA\`, \`FATURAS\`, \`PARCELAS\`, \`OCORRENCIAS\`, \`METAS\`, \`APORTES_METAS\` e \`TRANSACOES\`. Sem dados registrados, o Dashboard mostra zeros explicitamente indicados como base vazia; jamais inventa saldos.
+
+Instruções: [Fase 2B — Dashboard Executivo](docs/FASE_2B_DASHBOARD.md)
+
+**A fase não contém cadastro, pagamento, criação de recorrências nem fechamento de mês.** O acesso via Web App permanece limitado ao proprietário.

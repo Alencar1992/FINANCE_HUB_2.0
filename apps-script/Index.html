@@ -3,82 +3,324 @@
 <head>
   <base target="_top">
   <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <style>
-    :root{color-scheme:dark;font-family:system-ui,-apple-system,Segoe UI,Arial,sans-serif}
-    *{box-sizing:border-box}
-    body{margin:0;background:#000;color:#fff;min-height:100dvh;padding:22px}
-    main{max-width:460px;margin:30px auto}
-    .brand{font-weight:800;letter-spacing:.5px;display:flex;align-items:center;gap:12px}
-    .logo{background:#1479f6;border-radius:14px;padding:12px}
-    h1{font-size:24px;margin:32px 0 8px}
-    p{color:#a5b0c4;line-height:1.55;font-size:14px}
-    .card{background:#11151c;border:1px solid #263143;border-radius:20px;padding:20px;margin:18px 0}
-    .state{font-weight:700;color:#93a3bd;font-size:18px}
-    .ok{color:#49d69b}.bad{color:#ff9696}
-    .line{display:flex;justify-content:space-between;gap:12px;margin-top:14px;color:#bac7d8;font-size:13px}
-    .line strong{color:#fff;text-align:right}
-    button{width:100%;padding:15px;background:#1479f6;border:0;border-radius:14px;color:white;font-size:15px;font-weight:700;cursor:pointer}
-    button:disabled{opacity:.65;cursor:wait}
-    .detail{color:#8da6c5;font-size:12px;overflow-wrap:anywhere;margin-top:16px}
-    .foot{font-size:12px;text-align:center;color:#70839d;margin-top:22px}
-  </style>
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#000000">
+  <meta name="color-scheme" content="dark">
+  <title>FINANCE HUB 2.0 · Executivo HML</title>
+<style>
+:root{--bg:#000;--panel:#0d131d;--card:#101826;--border:#243146;--sub:#8193aa;--white:#f7faff;--blue:#5297ff;--blue2:#1b6ef6;--green:#47d9a3;--red:#ff899a;--amber:#ffd18c}
+*{box-sizing:border-box}
+html,body{min-height:100%;margin:0}
+body{background:#000;color:var(--white);font-family:Inter,-apple-system,BlinkMacSystemFont,"Segoe UI",Arial,sans-serif;-webkit-font-smoothing:antialiased}
+button,input{font:inherit}button{cursor:pointer;border:0}button:focus-visible,input:focus-visible{outline:2px solid var(--blue);outline-offset:3px}
+button:disabled{opacity:.45;cursor:not-allowed}
+.app{width:100%;max-width:530px;margin:0 auto;min-height:100dvh;position:relative;background:#000}
+.header{display:flex;align-items:center;justify-content:space-between;padding:16px 18px 14px;border-bottom:1px solid #101c2b;gap:12px}
+.brand{display:flex;align-items:center;gap:10px;min-width:0}
+.mark{display:grid;place-items:center;background:#176bec;width:36px;height:36px;border-radius:12px;font-weight:900}
+.brand-title{font-size:14px;letter-spacing:-.05em;font-weight:850}
+.brand-sub{font-size:9px;color:#8ba6c8;letter-spacing:.18em;margin-top:3px;font-weight:750}
+.headright{display:flex;gap:9px;align-items:center}
+.iconbtn{border:1px solid var(--border);background:#0d1522;color:#cfe0f6;width:37px;height:37px;display:grid;place-items:center;border-radius:12px;position:relative}
+.iconbtn .dot{position:absolute;right:5px;top:4px;background:#ffbd75;color:#10151b;font-size:9px;font-weight:800;border-radius:99px;padding:0 4px;min-width:15px;height:15px;display:none;align-items:center;justify-content:center}
+.avatar{background:#152f52;color:#99c4ff;display:grid;place-items:center;border-radius:12px;width:36px;height:36px;font-weight:900;font-size:11px}
+svg{width:19px;height:19px;stroke:currentColor;stroke-width:1.8;fill:none;stroke-linecap:round;stroke-linejoin:round}
+main{padding:16px 18px 100px}
+.envline{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:16px}
+.envbadge{font-size:10px;font-weight:850;letter-spacing:.12em;color:#9cbefa;background:#0e223c;border:1px solid #29486e;padding:7px 10px;border-radius:99px}
+.readonly{font-size:11px;color:#a8b8cc}
+.banner{width:100%;display:flex;gap:12px;text-align:left;align-items:center;padding:13px 13px;border:1px solid #795b30;background:linear-gradient(135deg,#2c2117,#13151b);border-radius:16px;color:#f8dfb7;margin-bottom:20px}
+.banner.safe{border-color:#23433b;background:#0d201e;color:#78e4b5}
+.banner svg{flex-shrink:0}
+.bannertext{flex:1;font-size:12px;font-weight:700;line-height:1.5}
+.chev{font-size:22px;color:#e0b47c}
+.headrow{display:flex;align-items:center;justify-content:space-between;gap:9px;margin-bottom:17px}
+.eyebrow{color:#8fb0db;font-size:10px;letter-spacing:.15em;font-weight:850;text-transform:uppercase}
+h1{font-size:26px;letter-spacing:-.065em;line-height:1.2;margin:7px 0 4px}
+.desc{font-size:12px;color:var(--sub)}
+.month{max-width:126px;width:125px;min-height:40px;border:1px solid var(--border);border-radius:11px;color:#c9daed;background:#0b1625;font-size:11px;padding:7px;accent-color:var(--blue);color-scheme:dark}
+.balance{background:linear-gradient(120deg,#122b4e 0%,#0c1a32 60%,#101927 100%);border:1px solid #2c5286;border-radius:25px;padding:22px;position:relative;overflow:hidden}
+.balance:after{content:"";position:absolute;right:-78px;top:-110px;width:225px;height:225px;border-radius:50%;border:1px solid #ffffff10;box-shadow:0 0 0 30px #ffffff07,0 0 0 63px #ffffff04;pointer-events:none}
+.balance-top{font-size:11px;color:#c0d0e5;font-weight:680}
+.balance-value{font-size:34px;letter-spacing:-.08em;font-weight:850;margin:14px 0 19px;font-variant-numeric:tabular-nums}
+.balance-bottom{font-size:10px;color:#b9cce4;display:flex;align-items:center;justify-content:space-between;gap:8px}
+.balance-bottom b{color:#72e7b6;background:#123f39;border:1px solid #245a4e;padding:6px 9px;border-radius:8px}
+.grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:12px}
+.kpi{background:var(--panel);border:1px solid var(--border);border-radius:19px;padding:15px;min-width:0}
+.kpi-label{font-size:10px;color:#a2b0c2;display:flex;gap:8px;align-items:center;font-weight:650}
+.circle{width:7px;height:7px;border-radius:50%;background:var(--blue)}
+.circle.green{background:var(--green)}.circle.red{background:var(--red)}.circle.amber{background:var(--amber)}
+.kpi-value{font-weight:850;letter-spacing:-.055em;font-size:19px;margin-top:12px;font-variant-numeric:tabular-nums;white-space:nowrap}
+.kpi-hint{font-size:10px;line-height:1.45;color:#8596ac;margin-top:6px}
+h2{font-size:15px;letter-spacing:-.035em;margin:0}
+.section-title{display:flex;align-items:center;justify-content:space-between;margin:26px 0 12px}
+.muted{color:var(--sub);font-size:11px}
+.card{background:var(--panel);border:1px solid var(--border);border-radius:20px;padding:15px}
+.item{display:flex;gap:12px;align-items:center;padding:11px 0;border-bottom:1px solid #222e3f;min-width:0}
+.item:first-child{padding-top:0}.item:last-child{border-bottom:0;padding-bottom:0}
+.itemicon{display:grid;place-items:center;flex:none;width:41px;height:41px;border-radius:13px;color:#87b4ff;background:#152640}
+.iteminfo{flex:1;min-width:0}.item-title{font-size:12px;font-weight:820;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.item-sub{font-size:10px;line-height:1.45;color:#93a3b7;margin-top:5px}
+.item-val{text-align:right;font-size:12px;font-weight:850;white-space:nowrap;font-variant-numeric:tabular-nums}
+.empty{color:#94a6bc;text-align:center;padding:25px 12px;font-size:12px;line-height:1.65}
+.goal{padding:13px 0;border-bottom:1px solid #202a3d}
+.goal:first-child{padding-top:0}.goal:last-child{padding-bottom:0;border:0}
+.goal-top,.goal-foot{display:flex;justify-content:space-between;gap:8px;align-items:center}
+.goal-name{font-size:12px;font-weight:800}
+.goal-amount{font-size:11px;color:#a7bdd8}
+.track{height:8px;border-radius:99px;background:#243348;margin:12px 0 9px;overflow:hidden}
+.bar{height:100%;background:linear-gradient(90deg,#1a6ff2,#62b4ff);border-radius:99px}
+.goal-foot{font-size:10px;color:var(--sub)}
+.alert-popup{position:absolute;z-index:30;right:13px;top:65px;width:min(370px,calc(100vw - 26px));padding:14px;border:1px solid #314664;border-radius:18px;background:#121a27;box-shadow:0 25px 90px #000d}
+.pophead{display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;font-size:14px;font-weight:800}
+.popbtn{width:100%;text-align:left;background:#0a111a;color:#ecf3ff;border-radius:12px;padding:12px;margin-top:7px;border:1px solid #223043;display:block}
+.popbtn b{font-size:12px;display:block}.popbtn span{font-size:10px;color:#acbcd2;display:block;margin-top:5px}
+.notice{background:#121b28;border:1px solid #243751;color:#a6bedc;border-radius:15px;padding:13px;font-size:11px;line-height:1.6;margin-top:18px}
+.info{display:none;border:1px solid #4d3d2b;background:#241d16;border-radius:14px;color:#f4d29d;padding:13px;font-size:12px;margin:12px 0;line-height:1.5}
+.info.show{display:block}
+.retry{background:#176df2;border-radius:11px;color:white;padding:10px 15px;margin-top:10px;font-weight:800}
+.footer{position:fixed;bottom:0;left:50%;transform:translateX(-50%);width:100%;max-width:530px;background:rgba(7,12,20,.97);border-top:1px solid #253347;display:flex;justify-content:space-around;padding:11px 12px calc(11px + env(safe-area-inset-bottom));z-index:15;backdrop-filter:blur(14px)}
+.navitem{background:none;color:#8298b0;display:flex;gap:5px;flex-direction:column;align-items:center;font-size:10px;font-weight:650;min-width:56px;padding:0 3px}
+.navitem.active{color:#70adff}.navitem svg{width:21px;height:21px}
+.toast{position:fixed;z-index:50;left:50%;bottom:92px;transform:translateX(-50%);background:#1a2d47;border:1px solid #366095;border-radius:13px;color:white;padding:12px 14px;min-width:230px;max-width:90vw;text-align:center;font-size:12px;box-shadow:0 12px 40px #000c}
+.flash{animation:highlight 1.7s ease}
+@keyframes highlight{0%,60%{background:#173052}100%{background:var(--panel)}}
+@media(min-width:620px){.app{box-shadow:0 0 0 1px #18253c,0 20px 100px #0007}body{background:#060a10}}
+@media(max-width:360px){.balance-value{font-size:29px}.kpi-value{font-size:17px}main{padding-left:14px;padding-right:14px}.headrow h1{font-size:23px}}
+@media(prefers-reduced-motion:reduce){.flash{animation:none}}
+</style>
 </head>
 <body>
+<div class="app">
+  <header class="header">
+    <div class="brand"><div class="mark" aria-hidden="true">▤</div>
+      <div><div class="brand-title">FINANCE HUB</div><div class="brand-sub">PERSONAL FINANCE 2.0</div></div>
+    </div>
+    <div class="headright">
+      <button class="iconbtn" id="bell" aria-label="Abrir notificações" aria-expanded="false">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M18 8a6 6 0 0 0-12 0c0 7-3 7-3 9h18c0-2-3-2-3-9"/><path d="M10 21h4"/></svg>
+        <span class="dot" id="alert-count">0</span>
+      </button>
+      <div class="avatar" title="Acesso privado">FH</div>
+    </div>
+  </header>
+  <div id="alert-popup" class="alert-popup" hidden>
+    <div class="pophead"><span>Notificações financeiras</span><button class="iconbtn" id="close-pop" aria-label="Fechar notificações">×</button></div>
+    <div id="alert-items"></div>
+  </div>
   <main>
-    <div class="brand"><span class="logo">FH</span><span>FINANCE HUB 2.0</span></div>
-    <h1>Conexão com Google Sheets</h1>
-    <p>Diagnóstico de homologação. Esta tela confirma se o Apps Script consegue acessar a base e validar a estrutura, sem fazer lançamentos.</p>
-    <section class="card" aria-live="polite">
-      <div id="status" class="state">Aguardando teste…</div>
-      <div class="line"><span>Ambiente</span><strong>HML</strong></div>
-      <div class="line"><span>Permissão</span><strong>Somente leitura</strong></div>
-      <div class="line"><span>Abas validadas</span><strong id="tabs">—</strong></div>
-      <div class="line"><span>Versão do esquema</span><strong id="version">—</strong></div>
-      <div id="details" class="detail"></div>
+    <div class="envline"><span class="envbadge">HML · HOMOLOGAÇÃO</span><span class="readonly"> <span aria-hidden="true">●</span> Somente leitura</span></div>
+    <button class="banner safe" id="main-alert" type="button">
+      <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M18 8a6 6 0 0 0-12 0c0 7-3 7-3 9h18c0-2-3-2-3-9"/></svg>
+      <span class="bannertext" id="main-alert-text">Conectando ao Google Sheets…</span><span class="chev">›</span>
+    </button>
+    <div class="headrow">
+      <div><div class="eyebrow" id="period-heading">CONTROLE FINANCEIRO · HML</div><h1>Visão financeira</h1><div class="desc">Seu dinheiro sob controle.</div></div>
+      <input class="month" id="month" type="month" aria-label="Selecionar mês" min="2000-01" max="2099-12">
+    </div>
+    <div id="error" class="info" role="alert"><span id="error-text"></span><div><button class="retry" id="retry">Tentar novamente</button></div></div>
+    <section class="balance" aria-label="Saldo atual">
+      <div class="balance-top">Saldo disponível em contas</div>
+      <div class="balance-value" id="balance">—</div>
+      <div class="balance-bottom"><span id="balance-detail">Aguardando dados</span><b id="balance-status">Conectando</b></div>
     </section>
-    <button id="retry" type="button">Verificar conexão</button>
-    <p class="foot">Nenhum dado financeiro é enviado ao navegador nesta etapa.</p>
+    <div class="grid" aria-label="Resumo financeiro">
+      <section class="kpi"><div class="kpi-label"><span class="circle green"></span>Entradas no mês</div><div id="incoming" class="kpi-value">—</div><div class="kpi-hint">Movimentações efetivadas</div></section>
+      <section class="kpi"><div class="kpi-label"><span class="circle red"></span>Saídas de caixa</div><div id="outgoing" class="kpi-value">—</div><div class="kpi-hint">Pagamentos efetivados</div></section>
+      <section class="kpi"><div class="kpi-label"><span class="circle amber"></span>Comprometido</div><div id="committed" class="kpi-value">—</div><div class="kpi-hint">Pendências até o fim do mês atual</div></section>
+      <section class="kpi"><div class="kpi-label"><span class="circle"></span>Livre projetado</div><div id="free" class="kpi-value" style="color:#8ebcff">—</div><div class="kpi-hint">Saldo atual menos compromissos</div></section>
+    </div>
+
+    <div class="section-title" id="pending"><h2>Próximos vencimentos</h2><span class="muted">Pendências registradas</span></div>
+    <section class="card" id="upcoming-list"><div class="empty">Aguardando consulta…</div></section>
+
+    <div class="section-title"><h2>Últimos lançamentos</h2><span class="muted" id="transaction-period">Competência</span></div>
+    <section class="card" id="recent-list"><div class="empty">Aguardando consulta…</div></section>
+
+    <div class="section-title"><h2>Suas metas</h2><span class="muted">Objetivos registrados</span></div>
+    <section class="card" id="goal-list"><div class="empty">Aguardando consulta…</div></section>
+    <p class="notice" id="disclaimer">Os totais são calculados a partir da base HML. Esta versão não cadastra nem altera transações, e a projeção considera apenas obrigações já registradas.</p>
   </main>
+  <nav class="footer" aria-label="Menu principal">
+    <button class="navitem active" aria-current="page" data-nav="Início"><svg viewBox="0 0 24 24"><path d="m3 10 9-7 9 7v10H3z"/><path d="M9 20v-7h6v7"/></svg>Início</button>
+    <button class="navitem" data-nav="Entradas"><svg viewBox="0 0 24 24"><path d="M12 3v17M5 13l7 7 7-7"/></svg>Entradas</button>
+    <button class="navitem" data-nav="Saídas"><svg viewBox="0 0 24 24"><path d="M12 21V4M5 11l7-7 7 7"/></svg>Saídas</button>
+    <button class="navitem" data-nav="Metas"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="4"/></svg>Metas</button>
+    <button class="navitem" data-nav="Mais"><svg viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/></svg>Mais</button>
+  </nav>
+  <div id="toast" class="toast" role="status" hidden></div>
+</div>
 <script>
-(function(){
+(function() {
   'use strict';
-  var status = document.getElementById('status');
-  var button = document.getElementById('retry');
-  var tabs = document.getElementById('tabs');
-  var version = document.getElementById('version');
-  var details = document.getElementById('details');
-  function render(result){
-    button.disabled = false;
-    status.textContent = result.ok ? 'Conexão validada ✓' : 'Verificação pendente';
-    status.className = 'state ' + (result.ok ? 'ok' : 'bad');
-    tabs.textContent = result.foundSheets === undefined ? '—' : result.foundSheets + ' / ' + result.expectedSheets;
-    version.textContent = result.schemaVersion || '—';
-    var problems = [];
-    if (result.status !== 'CONNECTION_OK') problems.push('Status: ' + (result.status || 'ERROR'));
-    if (result.missingSheets && result.missingSheets.length) problems.push('Abas ausentes: ' + result.missingSheets.join(', '));
-    if (result.missingColumns && result.missingColumns.length) problems.push('Colunas ausentes: ' + result.missingColumns.join(', '));
-    if (result.duplicateColumns && result.duplicateColumns.length) problems.push('Colunas repetidas: ' + result.duplicateColumns.join(', '));
-    if (result.timeZoneOk === false) problems.push('Fuso horário da planilha deve ser America/Sao_Paulo');
-    if (result.configOk === false) problems.push('Configuração HML ou versão do esquema inválida');
-    details.textContent = problems.join(' | ') || '32 abas conferidas e estrutura pronta para a próxima fase.';
+  var current = null;
+  var hiddenMoney = false;
+  var monthPicker = document.getElementById('month');
+  var bell = document.getElementById('bell');
+  var popup = document.getElementById('alert-popup');
+  var alertItems = document.getElementById('alert-items');
+  var banner = document.getElementById('main-alert');
+  var toastElement = document.getElementById('toast');
+  var money = new Intl.NumberFormat('pt-BR',{style:'currency',currency:'BRL'});
+  var monthFmt = new Intl.DateTimeFormat('pt-BR',{month:'long',year:'numeric',timeZone:'America/Sao_Paulo'});
+  function el(tag, className, content) {
+    var node = document.createElement(tag);
+    if (className) node.className = className;
+    if (content !== undefined && content !== null) node.textContent = String(content);
+    return node;
   }
-  function run(){
-    button.disabled = true;
-    status.className = 'state';
-    status.textContent = 'Conferindo…';
-    tabs.textContent = '—'; version.textContent = '—'; details.textContent = '';
-    if (!(window.google && google.script && google.script.run)) {
-      render({ok:false,status:'ABRIR_DENTRO_DO_APPS_SCRIPT'});
+  function text(id, value) { document.getElementById(id).textContent = String(value); }
+  function moneyFmt(cents) { return money.format(Number(cents || 0) / 100); }
+  function showMoney(cents) { return hiddenMoney ? '••••••' : moneyFmt(cents); }
+  function dateLabel(iso) {
+    var bits = String(iso).split('-');
+    return bits.length === 3 ? bits[2] + '/' + bits[1] + '/' + bits[0] : '—';
+  }
+  function monthLabel(month) {
+    var date = new Date(month + '-01T12:00:00Z');
+    return monthFmt.format(date);
+  }
+  function empty(list, message) {
+    list.replaceChildren(el('div','empty',message));
+  }
+  function toast(message) {
+    toastElement.textContent = message;
+    toastElement.hidden = false;
+    window.clearTimeout(toastElement.timerId);
+    toastElement.timerId = window.setTimeout(function(){toastElement.hidden=true;},3000);
+  }
+  function setError(code) {
+    document.getElementById('error').classList.add('show');
+    text('error-text','Não foi possível consultar o Dashboard (' + code + '). Confira o projeto HML e tente novamente.');
+    text('balance-status','Indisponível');
+    text('main-alert-text','Conexão indisponível. Toque para tentar novamente.');
+    banner.classList.remove('safe');
+  }
+  function clearError(){document.getElementById('error').classList.remove('show');}
+  function row(container, item, amount, subtitle, id) {
+    var root = el('div','item');
+    if (id) root.id = 'entry-' + id.replace(/[^a-zA-Z0-9_-]/g,'-');
+    var ico = el('div','itemicon','◷');
+    var info = el('div','iteminfo');
+    info.appendChild(el('div','item-title',item));
+    info.appendChild(el('div','item-sub',subtitle));
+    root.appendChild(ico);root.appendChild(info);root.appendChild(el('div','item-val',showMoney(amount)));
+    container.appendChild(root);
+  }
+  function openPending(id) {
+    popup.hidden = true;
+    bell.setAttribute('aria-expanded','false');
+    var target = document.getElementById('entry-' + String(id).replace(/[^a-zA-Z0-9_-]/g,'-')) ||
+      document.getElementById('pending');
+    target.scrollIntoView({behavior:'smooth',block:'center'});
+    target.classList.remove('flash');void target.offsetWidth;target.classList.add('flash');
+  }
+  function renderAlerts(data) {
+    var alerts = data.alerts || [];
+    alertItems.replaceChildren();
+    var dot = document.getElementById('alert-count');
+    dot.style.display = alerts.length ? 'flex' : 'none';
+    dot.textContent = alerts.length > 9 ? '9+' : String(alerts.length);
+    if (!alerts.length) {
+      alertItems.appendChild(el('div','empty','Nenhum vencimento em atraso ou nos próximos sete dias.'));
+      text('main-alert-text','Nenhum vencimento próximo nos próximos 7 dias');
+      banner.classList.add('safe');
       return;
     }
-    google.script.run
-      .withSuccessHandler(render)
-      .withFailureHandler(function(){render({ok:false,status:'ERROR_CALLING_APPS_SCRIPT'});})
-      .getConnectionStatus();
+    var first = alerts[0];
+    text('main-alert-text', first.label + ' · ' + first.title + ' · ' + showMoney(first.amountCents) + ' · ' + dateLabel(first.due));
+    banner.classList.remove('safe');
+    alerts.forEach(function(a) {
+      var btn = el('button','popbtn');
+      btn.type = 'button';
+      btn.appendChild(el('b','',a.label + ' · ' + a.title));
+      btn.appendChild(el('span','',dateLabel(a.due) + ' · ' + showMoney(a.amountCents) + ' · Ver pendência'));
+      btn.addEventListener('click', function(){openPending(a.id);});
+      alertItems.appendChild(btn);
+    });
   }
-  button.addEventListener('click',run);
-  run();
+  function render(data) {
+    current=data;clearError();
+    monthPicker.value=data.month;
+    text('period-heading','CONTROLE FINANCEIRO · ' + monthLabel(data.month).toUpperCase());
+    text('transaction-period',monthLabel(data.month));
+    text('balance',showMoney(data.stats.balanceCents));
+    text('balance-detail',data.stats.activeAccounts + ' conta(s) ativa(s) · atualização HML');
+    text('balance-status',data.isEmpty?'Base vazia':'Atualizado');
+    text('incoming',showMoney(data.stats.incomingCents));
+    text('outgoing',showMoney(data.stats.outgoingCents));
+    text('committed',showMoney(data.stats.committedCents));
+    text('free',showMoney(data.stats.freeCents));
+    renderAlerts(data);
+
+    var upcoming=document.getElementById('upcoming-list');
+    upcoming.replaceChildren();
+    if(!data.upcoming.length)empty(upcoming,'Nenhuma obrigação vencida ou próxima já registrada. Recorrências ainda não geradas não aparecem aqui.');
+    else data.upcoming.forEach(function(x){
+      row(upcoming,x.title,x.amountCents,x.type+' · vence '+dateLabel(x.due),x.id);
+    });
+
+    var recent=document.getElementById('recent-list');
+    recent.replaceChildren();
+    if(!data.recent.length)empty(recent,'Nenhum lançamento nesta competência.');
+    else data.recent.forEach(function(x){
+      row(recent,x.title,x.amountCents,(x.type==='ENTRADA'?'Entrada':'Saída')+' · '+dateLabel(x.date));
+    });
+
+    var goals=document.getElementById('goal-list');
+    goals.replaceChildren();
+    if(!data.goals.length)empty(goals,'Nenhuma meta cadastrada na planilha HML.');
+    else data.goals.forEach(function(x){
+      var card=el('div','goal');
+      var top=el('div','goal-top');
+      top.appendChild(el('span','goal-name',x.title));
+      top.appendChild(el('span','goal-amount',showMoney(x.savedCents)+' / '+showMoney(x.targetCents)));
+      card.appendChild(top);
+      var track=el('div','track');
+      var fill=el('div','bar');
+      fill.style.width=Math.max(0,Math.min(100,Number(x.progress||0)))+'%';
+      track.appendChild(fill);card.appendChild(track);
+      card.appendChild(el('div','goal-foot',x.progress+'% concluído'));
+      goals.appendChild(card);
+    });
+
+    text('disclaimer', data.isEmpty
+      ? 'A base de homologação não possui registros financeiros. Os valores R$ 0,00 são reais para esta base vazia, não são números fictícios. Nesta fase, nenhuma alteração é permitida.'
+      : 'Somente leitura · HML. Entradas e saídas exibem caixa efetivado na competência selecionada. O saldo e o livre projetado são valores atuais; os compromissos incluem apenas contas, faturas e parcelas sem cartão registradas. Não há sincronização bancária automática.');
+    if(data.warnings && data.warnings.length)toast('Existem movimentações não efetivadas que não entram nos totais.');
+  }
+  function load(month){
+    text('main-alert-text','Consultando a planilha HML…');
+    banner.classList.add('safe');
+    if(!(window.google && google.script && google.script.run)){
+      setError('ABRIR_PELO_APPS_SCRIPT');
+      return;
+    }
+    google.script.run.withSuccessHandler(function(response){
+      if(response && response.ok && response.data) render(response.data);
+      else setError(response && response.status || 'SEM_RESPOSTA');
+    }).withFailureHandler(function(){setError('ERRO_DE_CONEXAO');})
+    .getDashboardData(month || '');
+  }
+  bell.addEventListener('click',function(){
+    popup.hidden=!popup.hidden;
+    bell.setAttribute('aria-expanded', String(!popup.hidden));
+  });
+  document.getElementById('close-pop').addEventListener('click',function(){popup.hidden=true;bell.setAttribute('aria-expanded','false');});
+  banner.addEventListener('click',function(){
+    if(!current){load(monthPicker.value);return;}
+    if(current.alerts.length)openPending(current.alerts[0].id);
+    else{popup.hidden=false;bell.setAttribute('aria-expanded','true');}
+  });
+  document.getElementById('retry').addEventListener('click',function(){load(monthPicker.value);});
+  monthPicker.addEventListener('change',function(){if(monthPicker.value)load(monthPicker.value);});
+  document.querySelectorAll('[data-nav]').forEach(function(button){
+    button.addEventListener('click',function(){
+      if(button.getAttribute('data-nav')==='Início'){window.scrollTo({top:0,behavior:'smooth'});return;}
+      toast('Módulo '+button.getAttribute('data-nav')+' será integrado em outra fase. Dashboard: somente leitura.');
+    });
+  });
+  load('');
 })();
 </script>
 </body>

@@ -1,24 +1,26 @@
 /**
- * FINANCE HUB 2.0 — Fase 2A: diagnóstico somente leitura.
- * NÃO há funções que gravem, apaguem ou movimentem dinheiro.
- *
- * ATENÇÃO: o HTML abaixo é apenas uma tela técnica de homologação.
- * O protótipo visual Executivo será integrado depois.
+ * FINANCE HUB 2.0 — HML (somente leitura).
+ * O dashboard lê dados existentes, sem criação ou alteração de lançamentos.
  */
 function doGet() {
   return HtmlService.createHtmlOutputFromFile('Index')
-    .setTitle('FINANCE HUB 2.0 | Conexão HML')
+    .setTitle('FINANCE HUB 2.0 | Executivo HML')
     .addMetaTag('viewport', 'width=device-width, initial-scale=1');
 }
 
-/** Chamável pelo front-end; retorna somente metadados técnicos. */
+/** Diagnóstico técnico da Fase 2A mantido. */
 function getConnectionStatus() {
   return financeRunConnectionTest_();
 }
 
-/** Rodar manualmente no editor para conceder permissões e testar conexão. */
+/** Teste manual de conexão, mantido para regressão. */
 function runConnectionTest() {
   var result = financeRunConnectionTest_();
   console.log(JSON.stringify(result));
   return result;
+}
+
+/** Endpoint somente leitura utilizado pelo Dashboard Executivo. */
+function getDashboardData(selectedMonth) {
+  return fhGetDashboardData_(selectedMonth);
 }
