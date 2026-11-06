@@ -104,7 +104,7 @@
       <div class="fh2c-field"><label for="fh2c-tx-category">Categoria</label><select id="fh2c-tx-category" required></select></div>
       <div class="fh2c-field fh2c-extra" id="fh2c-extra-category" hidden><label for="fh2c-tx-other-category">Qual é a categoria?</label><input id="fh2c-tx-other-category" maxlength="80" placeholder="Descreva a categoria"></div>
       <div class="fh2c-field"><label for="fh2c-tx-merchant">Estabelecimento / pessoa</label>
-        <select id="fh2c-tx-merchant"><option value="">Não informar</option><option>Shopee</option><option>Mercado Livre</option><option>iFood</option><option>Lalamove</option><option value="Outro">Outro</option></select>
+        <select id="fh2c-tx-merchant"><option value="">Não informar</option><option>Shopee</option><option>Mercado Livre</option><option>iFood</option><option>Lalamove</option><option>Particular</option><option value="Outro">Outro</option></select>
       </div>
       <div class="fh2c-field fh2c-extra" id="fh2c-extra-merchant" hidden><label for="fh2c-tx-other-merchant">Nome da pessoa ou estabelecimento</label><input id="fh2c-tx-other-merchant" maxlength="80" placeholder="Informe o nome"></div>
       <div class="fh2c-field"><label for="fh2c-tx-method">Forma de pagamento / recebimento</label><select id="fh2c-tx-method">
@@ -193,6 +193,7 @@
   window.fhOpenModule=function(mod){
     if(mod==='Início'){
       layer.hidden=true;
+      document.querySelectorAll('.navitem').forEach(function(b){b.classList.toggle('active',b.getAttribute('data-nav')==='Início');});
       if(typeof window.fhRefreshDashboard==='function')window.fhRefreshDashboard();
       return true;
     }
@@ -235,6 +236,9 @@
         document.getElementById('fh2c-'+form).reset();
         document.getElementById('fh2c-acc-date').value=today;
         document.getElementById('fh2c-tx-date').value=today;
+        document.getElementById('fh2c-tx-type').value=currentPanel==='Saídas'?'SAIDA':'ENTRADA';
+        updateCats();
+        showExtras();
         refreshCatalog();
         if(typeof window.fhRefreshDashboard==='function')window.fhRefreshDashboard();
       } else {
