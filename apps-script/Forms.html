@@ -156,6 +156,8 @@
       if(!x||!x.ok){catalog={ok:false,writeEnabled:false,accounts:[],categories:[],cards:[],people:[]};
         showStatus('Falha ao consultar cadastros. Não grave informações.',false);return;}
       catalog=x;
+      var label=document.getElementById('hml-mode-label');
+      if(label)label.textContent=x.writeEnabled?'HML · gravação de teste':'HML · gravação bloqueada';
       showStatus(x.writeEnabled?'HML de testes: gravação habilitada. Use somente dados fictícios.':'Modo protegido: gravação desabilitada nas Propriedades do script.',!!x.writeEnabled);
       setOptions('fh2c-tx-account',x.accounts,'Selecione a conta',function(a){return a.name+' · '+a.bank;});
       setOptions('fh2c-card-payer',x.accounts,'Nenhuma conta pagadora',function(a){return a.name+' · '+a.bank;});
