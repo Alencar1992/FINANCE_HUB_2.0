@@ -5,6 +5,7 @@ on:
     branches:
       - feat/apps-script-sheets-hml
       - feat/dashboard-executivo-hml
+      - feat/phase-2c-hml-records
 
 permissions:
   contents: read

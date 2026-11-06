@@ -6,7 +6,11 @@
 function fhGetDashboardData_(selectedMonth) {
   var now = new Date();
   var checkedAt = now.toISOString();
+  var lock=null,locked=false;
   try {
+    lock=LockService.getScriptLock();
+    if(!lock.tryLock(18000))throw new Error('LOCK_TIMEOUT');
+    locked=true;
     var config = financeConfig_();
     financeAssertOwnerExecution_(config);
     var spreadsheet = SpreadsheetApp.openById(config.sheetId);
@@ -45,13 +49,15 @@ function fhGetDashboardData_(selectedMonth) {
       'INVALID_MONTH','INVALID_ENVIRONMENT','MISSING_SHEET_ID','MISSING_ALLOWED_EMAIL',
       'OWNER_MISMATCH','ACTIVE_USER_DENIED','SHEET_NOT_ACCESSIBLE','SHEET_NOT_FOUND',
       'ROW_LIMIT_EXCEEDED','MISSING_COLUMN','UNKNOWN_ACCOUNT_MOVEMENT',
-      'INVALID_ACCOUNT_ID','INVALID_GOAL_ID'
+      'INVALID_ACCOUNT_ID','INVALID_GOAL_ID','LOCK_TIMEOUT'
     ];
     var text = String(error && error.message || '');
     var status = known.indexOf(text) >= 0 ? text :
       /^(INVALID_CENTS|INVALID_DATE|MISSING_ID)_/.test(text) ? 'INVALID_SOURCE_DATA' : 'DASHBOARD_ERROR';
     console.warn('FINANCE_HUB_HML_DASHBOARD ' + status);
     return {ok:false,status:status,checkedAt:checkedAt};
+  } finally {
+    if(locked)lock.releaseLock();
   }
 }
 

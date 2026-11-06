@@ -3,7 +3,7 @@
  * O dashboard lê dados existentes, sem criação ou alteração de lançamentos.
  */
 function doGet() {
-  return HtmlService.createHtmlOutputFromFile('Index')
+  return HtmlService.createTemplateFromFile('Index').evaluate()
     .setTitle('FINANCE HUB 2.0 | Executivo HML')
     .addMetaTag('viewport', 'width=device-width, initial-scale=1');
 }
@@ -23,4 +23,10 @@ function runConnectionTest() {
 /** Endpoint somente leitura utilizado pelo Dashboard Executivo. */
 function getDashboardData(selectedMonth) {
   return fhGetDashboardData_(selectedMonth);
+}
+
+/** Inclusão exclusiva de componente local; não recebe nomes arbitrários da Web App. */
+function fhInclude_(file) {
+  if (file !== 'Forms') throw new Error('INVALID_INCLUDE');
+  return HtmlService.createHtmlOutputFromFile('Forms').getContent();
 }

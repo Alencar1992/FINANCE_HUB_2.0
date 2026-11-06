@@ -1,0 +1,285 @@
+<!-- FINANCE HUB 2.0 · Fase 2C — módulos mobile HML -->
+<style>
+.fh2c-layer[hidden],.fh2c-panel[hidden],.fh2c-extra[hidden]{display:none!important}
+.fh2c-layer{position:fixed;inset:67px 0 calc(66px + env(safe-area-inset-bottom));z-index:12;
+ max-width:530px;margin:auto;overflow:auto;background:#000;padding:16px 18px 38px}
+.fh2c-top{display:flex;align-items:center;gap:10px;margin-bottom:20px}
+.fh2c-back{border-radius:11px;border:1px solid #294063;background:#111c30;color:#c0daff;padding:11px 13px}
+.fh2c-title{font-size:20px;font-weight:850;letter-spacing:-.05em}
+.fh2c-sub{font-size:11px;color:#92a6bf;margin-top:5px}
+.fh2c-state{font-size:12px;color:#f3c78a;background:#282018;border:1px solid #705637;border-radius:13px;padding:13px;margin-bottom:15px;line-height:1.6}
+.fh2c-state.on{color:#88e5ba;background:#0f2421;border-color:#285b48}
+.fh2c-form{display:grid;gap:13px}
+.fh2c-field{display:grid;gap:6px}
+.fh2c-field label{font-size:11px;color:#adc0d8;font-weight:700}
+.fh2c-field input,.fh2c-field select,.fh2c-field textarea{
+ width:100%;border:1px solid #2d415f;background:#111927;color:#f5faff;outline:none;
+ padding:13px;border-radius:12px;font-size:14px;min-width:0;min-height:47px;
+}
+.fh2c-field input:focus,.fh2c-field select:focus,.fh2c-field textarea:focus{border-color:#4a99ff}
+.fh2c-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.fh2c-card{background:#0d1420;border:1px solid #243754;padding:17px;border-radius:18px;margin-bottom:12px}
+.fh2c-action{width:100%;background:#156ef4;color:white;border:0;border-radius:14px;padding:15px;font-weight:850;margin-top:8px}
+.fh2c-action:disabled{opacity:.4}
+.fh2c-msg{font-size:12px;color:#c0d5ee;line-height:1.6;min-height:20px;overflow-wrap:anywhere}
+.fh2c-menu{display:grid;gap:10px}
+.fh2c-menu button{display:flex;justify-content:space-between;align-items:center;background:#101826;
+ color:#fff;border:1px solid #2a405d;border-radius:15px;padding:17px;text-align:left;font-weight:750}
+.fh2c-menu button small{display:block;font-weight:400;color:#93aac5;margin-top:6px;line-height:1.5}
+.fh2c-note{font-size:11px;color:#829bb8;line-height:1.6;padding-top:10px}
+.fh2c-small{font-size:11px;color:#b8cae1;line-height:1.6}
+@media(max-width:370px){.fh2c-layer{padding:12px}.fh2c-grid{grid-template-columns:1fr}}
+</style>
+<section class="fh2c-layer" id="fh2c-layer" hidden aria-label="Cadastros e lançamentos">
+  <div class="fh2c-top"><button class="fh2c-back" type="button" id="fh2c-back">← Voltar</button>
+    <div><div class="fh2c-title" id="fh2c-title">Cadastros</div><div class="fh2c-sub">FINANCE HUB 2.0 · HML</div></div>
+  </div>
+  <div class="fh2c-state" id="fh2c-state" role="status">Conferindo permissão de cadastro...</div>
+
+  <section class="fh2c-panel" data-2c-panel="Mais" hidden>
+    <div class="fh2c-menu">
+      <button type="button" data-2c-go="Conta">Contas bancárias <small>Criar conta para o fluxo de caixa</small><span>›</span></button>
+      <button type="button" data-2c-go="Cartão">Cartões de crédito <small>Cadastrar banco, limite e vencimento — sem compras ainda</small><span>›</span></button>
+      <button type="button" data-2c-go="Pessoa">Pessoas <small>Cadastro para futuras dívidas, vendas e negociações</small><span>›</span></button>
+      <button type="button" data-2c-go="Entradas">Entradas <small>Registrar dinheiro já recebido</small><span>›</span></button>
+      <button type="button" data-2c-go="Saídas">Saídas <small>Registrar pagamentos já realizados</small><span>›</span></button>
+    </div>
+    <p class="fh2c-note">Parcelamentos, compras no crédito, negociação boca-a-boca, faturas e fechamento mensal serão liberados somente com regras financeiras validadas.</p>
+  </section>
+
+  <section class="fh2c-panel" data-2c-panel="Conta" hidden>
+    <form id="fh2c-account" class="fh2c-form">
+      <div class="fh2c-field"><label for="fh2c-acc-name">Nome da conta</label><input id="fh2c-acc-name" required maxlength="70" placeholder="Ex.: Conta principal" autocomplete="off"></div>
+      <div class="fh2c-field"><label for="fh2c-acc-bank">Instituição / banco</label><input id="fh2c-acc-bank" required maxlength="70" placeholder="Ex.: Banco Inter" autocomplete="off"></div>
+      <div class="fh2c-field"><label for="fh2c-acc-type">Tipo</label><select id="fh2c-acc-type"><option value="CORRENTE">Conta corrente</option><option value="POUPANCA">Poupança</option><option value="CARTEIRA">Carteira digital</option><option value="DINHEIRO">Dinheiro</option><option value="RESERVA">Reserva</option></select></div>
+      <div class="fh2c-grid">
+        <div class="fh2c-field"><label for="fh2c-acc-open">Saldo inicial (R$)</label><input id="fh2c-acc-open" required inputmode="decimal" placeholder="0,00" value="0,00"></div>
+        <div class="fh2c-field"><label for="fh2c-acc-date">Data de abertura</label><input id="fh2c-acc-date" required type="date"></div>
+      </div>
+      <button class="fh2c-action" type="submit" disabled>Salvar conta HML</button>
+      <div class="fh2c-msg" id="fh2c-account-msg" role="status"></div>
+    </form>
+  </section>
+
+  <section class="fh2c-panel" data-2c-panel="Cartão" hidden>
+    <form id="fh2c-card" class="fh2c-form">
+      <div class="fh2c-field"><label for="fh2c-card-name">Nome do cartão</label><input id="fh2c-card-name" required maxlength="60" placeholder="Ex.: Meu cartão Inter"></div>
+      <div class="fh2c-field"><label for="fh2c-card-bank">Banco emissor</label><input id="fh2c-card-bank" required maxlength="70" placeholder="Ex.: Inter"></div>
+      <div class="fh2c-grid">
+        <div class="fh2c-field"><label for="fh2c-card-brand">Bandeira</label><select id="fh2c-card-brand"><option>MASTERCARD</option><option>VISA</option><option>ELO</option><option>AMEX</option><option>OUTRA</option></select></div>
+        <div class="fh2c-field"><label for="fh2c-card-final">Últimos 4 dígitos</label><input id="fh2c-card-final" maxlength="4" inputmode="numeric" pattern="\d{4}" required placeholder="1234"></div>
+      </div>
+      <div class="fh2c-grid">
+        <div class="fh2c-field"><label for="fh2c-card-close">Dia do fechamento</label><input id="fh2c-card-close" type="number" min="1" max="28" required placeholder="20"></div>
+        <div class="fh2c-field"><label for="fh2c-card-due">Dia do vencimento</label><input id="fh2c-card-due" type="number" min="1" max="28" required placeholder="28"></div>
+      </div>
+      <div class="fh2c-field"><label for="fh2c-card-limit">Limite (R$)</label><input id="fh2c-card-limit" inputmode="decimal" required placeholder="2.000,00"></div>
+      <div class="fh2c-field"><label for="fh2c-card-payer">Conta pagadora (opcional)</label><select id="fh2c-card-payer"></select></div>
+      <p class="fh2c-note">Nesta etapa o cartão será apenas cadastrado. Compras, faturas e antecipações ainda não estão habilitadas.</p>
+      <button class="fh2c-action" type="submit" disabled>Salvar cartão HML</button>
+      <div class="fh2c-msg" id="fh2c-card-msg" role="status"></div>
+    </form>
+  </section>
+
+  <section class="fh2c-panel" data-2c-panel="Pessoa" hidden>
+    <form id="fh2c-person" class="fh2c-form">
+      <div class="fh2c-field"><label for="fh2c-person-name">Nome</label><input id="fh2c-person-name" maxlength="90" required placeholder="Nome da pessoa"></div>
+      <div class="fh2c-field"><label for="fh2c-person-alias">Apelido (opcional)</label><input id="fh2c-person-alias" maxlength="60" placeholder="Como você identifica"></div>
+      <button class="fh2c-action" type="submit" disabled>Salvar pessoa HML</button>
+      <div class="fh2c-msg" id="fh2c-person-msg" role="status"></div>
+    </form>
+  </section>
+
+  <section class="fh2c-panel" data-2c-panel="Entradas" hidden></section>
+  <section class="fh2c-panel" data-2c-panel="Saídas" hidden></section>
+  <section class="fh2c-panel" data-2c-panel="Movimentação" hidden>
+    <form id="fh2c-transaction" class="fh2c-form">
+      <div class="fh2c-field"><label for="fh2c-tx-type">Tipo</label><select id="fh2c-tx-type"><option value="ENTRADA">Entrada (recebi)</option><option value="SAIDA">Saída (paguei)</option></select></div>
+      <div class="fh2c-field"><label for="fh2c-tx-description">Descrição</label><input id="fh2c-tx-description" required maxlength="140" placeholder="Ex.: Entrega particular ou mercado"></div>
+      <div class="fh2c-grid">
+        <div class="fh2c-field"><label for="fh2c-tx-value">Valor (R$)</label><input id="fh2c-tx-value" required inputmode="decimal" placeholder="100,00"></div>
+        <div class="fh2c-field"><label for="fh2c-tx-date">Data do pagamento / recebimento</label><input id="fh2c-tx-date" type="date" required></div>
+      </div>
+      <div class="fh2c-field"><label for="fh2c-tx-account">Conta movimentada</label><select id="fh2c-tx-account" required></select></div>
+      <div class="fh2c-field"><label for="fh2c-tx-category">Categoria</label><select id="fh2c-tx-category" required></select></div>
+      <div class="fh2c-field fh2c-extra" id="fh2c-extra-category" hidden><label for="fh2c-tx-other-category">Qual é a categoria?</label><input id="fh2c-tx-other-category" maxlength="80" placeholder="Descreva a categoria"></div>
+      <div class="fh2c-field"><label for="fh2c-tx-merchant">Estabelecimento / pessoa</label>
+        <select id="fh2c-tx-merchant"><option value="">Não informar</option><option>Shopee</option><option>Mercado Livre</option><option>iFood</option><option>Lalamove</option><option>Particular</option><option value="Outro">Outro</option></select>
+      </div>
+      <div class="fh2c-field fh2c-extra" id="fh2c-extra-merchant" hidden><label for="fh2c-tx-other-merchant">Nome da pessoa ou estabelecimento</label><input id="fh2c-tx-other-merchant" maxlength="80" placeholder="Informe o nome"></div>
+      <div class="fh2c-field"><label for="fh2c-tx-method">Forma de pagamento / recebimento</label><select id="fh2c-tx-method">
+        <option value="forma_pix">Pix</option><option value="forma_debito">Débito</option><option value="forma_dinheiro">Dinheiro</option>
+        <option value="forma_transferencia">Transferência bancária para terceiro</option><option value="forma_boleto">Boleto liquidado</option>
+        <option value="forma_credito" disabled>Crédito parcelado — próxima fase</option>
+        <option value="forma_boca_a_boca" disabled>Negócio boca-a-boca — próxima fase</option>
+      </select></div>
+      <div class="fh2c-field"><label for="fh2c-tx-notes">Observações (opcional)</label><textarea id="fh2c-tx-notes" maxlength="300" rows="2" placeholder="Informações adicionais"></textarea></div>
+      <p class="fh2c-note">Somente pagamentos e recebimentos já realizados. Não use este formulário para faturas, contas recorrentes ou dívidas que precisam de baixa vinculada. Despesas no cartão NÃO são pagamentos à vista.</p>
+      <button class="fh2c-action" type="submit" disabled>Registrar movimentação HML</button>
+      <div class="fh2c-msg" id="fh2c-transaction-msg" role="status"></div>
+    </form>
+  </section>
+</section>
+<script>
+(function(){
+  'use strict';
+  var layer=document.getElementById('fh2c-layer');
+  var panels=Array.prototype.slice.call(layer.querySelectorAll('.fh2c-panel'));
+  var catalog={ok:false,writeEnabled:false,accounts:[],categories:[],cards:[],people:[]};
+  var working=false;
+  var ids={};
+  var currentPanel='Mais';
+  function id(){return 'req_'+Date.now().toString(36)+'_'+Math.random().toString(36).slice(2)+'_'+Math.random().toString(36).slice(2);}
+  function field(k){return document.getElementById('fh2c-'+k).value.trim();}
+  function moneyCents(s){
+    var v=String(s).replace(/\s|R\$/g,'');
+    if(!/^\d{1,3}(?:\.\d{3})*(?:,\d{1,2})?$|^\d{1,10}(?:,\d{1,2})?$/.test(v))throw Error('Informe o valor usando 100,00 ou 1.000,00');
+    v=v.replace(/\./g,'');
+    var p=v.split(',');
+    var result=Number(p[0])*100+Number((p[1]||'').padEnd(2,'0'));
+    if(!Number.isSafeInteger(result)||result>100000000000)throw Error('Valor fora do limite permitido');
+    return result;
+  }
+  function showStatus(message,on){
+    var e=document.getElementById('fh2c-state');e.textContent=message;e.classList.toggle('on',!!on);
+  }
+  function setOptions(id, values, placeholder, map){
+    var e=document.getElementById(id);e.replaceChildren();
+    var first=new Option(placeholder||'Selecione','');first.disabled=true;first.selected=true;e.appendChild(first);
+    values.forEach(function(item){e.add(new Option(map(item),item.id));});
+  }
+  function refreshCatalog(){
+    if(!(window.google&&google.script&&google.script.run)){
+      showStatus('Abra esta página no Web App do Apps Script HML para consultar a planilha.',false);return;
+    }
+    google.script.run.withSuccessHandler(function(x){
+      if(!x||!x.ok){catalog={ok:false,writeEnabled:false,accounts:[],categories:[],cards:[],people:[]};
+        showStatus('Falha ao consultar cadastros. Não grave informações.',false);return;}
+      catalog=x;
+      var label=document.getElementById('hml-mode-label');
+      if(label)label.textContent=x.writeEnabled?'HML · gravação de teste':'HML · gravação bloqueada';
+      showStatus(x.writeEnabled?'HML de testes: gravação habilitada. Use somente dados fictícios.':'Modo protegido: gravação desabilitada nas Propriedades do script.',!!x.writeEnabled);
+      setOptions('fh2c-tx-account',x.accounts,'Selecione a conta',function(a){return a.name+' · '+a.bank;});
+      setOptions('fh2c-card-payer',x.accounts,'Nenhuma conta pagadora',function(a){return a.name+' · '+a.bank;});
+      var payer=document.getElementById('fh2c-card-payer');payer.options[0].disabled=false;
+      layer.querySelectorAll('.fh2c-action').forEach(function(b){b.disabled=!x.writeEnabled||working;});
+      updateCats();
+    }).withFailureHandler(function(){showStatus('Não foi possível consultar o Apps Script. Nenhuma gravação disponível.',false);}).getHmlCatalog();
+  }
+  function updateCats(){
+    var t=field('tx-type');
+    setOptions('fh2c-tx-category',(catalog.categories||[]).filter(function(c){return c.type===t;}),
+      'Selecione a categoria',function(c){return c.name;});
+    showExtras();
+  }
+  function showExtras(){
+    var cat=field('tx-category');
+    var merchant=field('tx-merchant');
+    document.getElementById('fh2c-extra-category').hidden = cat!=='cat_outros_saida' && cat!=='cat_outros_entrada';
+    document.getElementById('fh2c-extra-merchant').hidden = merchant!=='Outro';
+  }
+  function setPanel(panel){
+    if(panel==='Entradas'||panel==='Saídas'){
+      panel='Movimentação';
+      document.getElementById('fh2c-tx-type').value=currentPanel==='Entradas'?'ENTRADA':'SAIDA';
+      updateCats();
+    }
+    panels.forEach(function(p){p.hidden=p.getAttribute('data-2c-panel')!==panel;});
+    document.getElementById('fh2c-title').textContent=panel==='Movimentação'
+      ?(currentPanel==='Entradas'?'Nova entrada':'Nova saída'):panel==='Mais'?'Cadastros e mais':panel;
+    layer.scrollTop=0;
+    if(!catalog.ok)refreshCatalog();
+  }
+  window.fhOpenModule=function(mod){
+    if(mod==='Início'){
+      layer.hidden=true;
+      document.querySelectorAll('.navitem').forEach(function(b){b.classList.toggle('active',b.getAttribute('data-nav')==='Início');});
+      if(typeof window.fhRefreshDashboard==='function')window.fhRefreshDashboard();
+      return true;
+    }
+    if(['Mais','Entradas','Saídas','Conta','Cartão','Pessoa'].indexOf(mod)<0)return false;
+    currentPanel=mod;
+    layer.hidden=false;
+    setPanel(mod);
+    document.querySelectorAll('.navitem').forEach(function(b){
+      b.classList.toggle('active',b.getAttribute('data-nav')===mod ||
+      (['Conta','Cartão','Pessoa'].indexOf(mod)>=0&&b.getAttribute('data-nav')==='Mais'));
+    });
+    return true;
+  };
+  document.getElementById('fh2c-back').addEventListener('click',function(){window.fhOpenModule(currentPanel==='Mais'?'Início':'Mais');});
+  layer.querySelectorAll('[data-2c-go]').forEach(function(b){b.addEventListener('click',function(){window.fhOpenModule(b.getAttribute('data-2c-go'));});});
+  document.getElementById('fh2c-tx-type').addEventListener('change',updateCats);
+  document.getElementById('fh2c-tx-category').addEventListener('change',showExtras);
+  document.getElementById('fh2c-tx-merchant').addEventListener('change',showExtras);
+  var today=new Date().toLocaleDateString('sv-SE',{timeZone:'America/Sao_Paulo'});
+  document.getElementById('fh2c-acc-date').value=today;
+  document.getElementById('fh2c-tx-date').value=today;
+  function submit(form,event,fn,build) {
+    event.preventDefault();
+    if(working||!catalog.writeEnabled)return;
+    var output=document.getElementById(form+'-msg');
+    var payload;
+    try{
+      if(!ids[form])ids[form]=id();
+      payload=build();
+      payload.requestId=ids[form];
+    }catch(e){output.textContent=e.message;return;}
+    working=true;
+    output.textContent='Registrando em homologação…';
+    layer.querySelectorAll('.fh2c-action').forEach(function(b){b.disabled=true;});
+    google.script.run.withSuccessHandler(function(result){
+      working=false;
+      if(result&&result.ok){
+        output.textContent=(result.status==='ALREADY_SAVED'?'Registro já existia; não foi duplicado.':'Registro confirmado na base HML.');
+        ids[form]='';
+        document.getElementById('fh2c-'+form).reset();
+        document.getElementById('fh2c-acc-date').value=today;
+        document.getElementById('fh2c-tx-date').value=today;
+        document.getElementById('fh2c-tx-type').value=currentPanel==='Saídas'?'SAIDA':'ENTRADA';
+        updateCats();
+        showExtras();
+        refreshCatalog();
+        if(typeof window.fhRefreshDashboard==='function')window.fhRefreshDashboard();
+      } else {
+        var code=result&&result.status||'ERRO_SEM_RESPOSTA';
+        output.textContent='Não confirmado: '+code+(code==='WRITE_UNCERTAIN'||code==='RECONCILIATION_REQUIRED'?
+          '. NÃO inicie novo lançamento; preserve o identificador e peça reconciliação.':'');
+        layer.querySelectorAll('.fh2c-action').forEach(function(b){b.disabled=!catalog.writeEnabled;});
+      }
+    }).withFailureHandler(function(){
+      working=false;
+      output.textContent='Resultado incerto. Não faça outro lançamento com um novo identificador; verifique a auditoria primeiro.';
+      layer.querySelectorAll('.fh2c-action').forEach(function(b){b.disabled=!catalog.writeEnabled;});
+    })[fn](payload);
+  }
+  document.getElementById('fh2c-account').addEventListener('submit',function(e){
+    submit('account',e,'saveHmlAccount',function(){return {
+      nome:field('acc-name'),instituicao:field('acc-bank'),tipo:field('acc-type'),
+      aberturaCents:moneyCents(field('acc-open')),dataAbertura:field('acc-date')
+    };});
+  });
+  document.getElementById('fh2c-card').addEventListener('submit',function(e){
+    submit('card',e,'saveHmlCard',function(){return {
+      nome:field('card-name'),banco:field('card-bank'),bandeira:field('card-brand'),
+      final4:field('card-final'),fechamento:Number(field('card-close')),vencimento:Number(field('card-due')),
+      limiteCents:moneyCents(field('card-limit')),contaPagadora:field('card-payer')
+    };});
+  });
+  document.getElementById('fh2c-person').addEventListener('submit',function(e){
+    submit('person',e,'saveHmlPerson',function(){return {nome:field('person-name'),apelido:field('person-alias')};});
+  });
+  document.getElementById('fh2c-transaction').addEventListener('submit',function(e){
+    submit('transaction',e,'saveHmlTransaction',function(){
+      var merchant=field('tx-merchant');
+      return {tipo:field('tx-type'),data:field('tx-date'),descricao:field('tx-description'),
+        valorCents:moneyCents(field('tx-value')),conta:field('tx-account'),
+        categoria:field('tx-category'),categoriaOutra:document.getElementById('fh2c-extra-category').hidden?'':field('tx-other-category'),
+        estabelecimento:merchant==='Outro'?field('tx-other-merchant'):merchant,
+        forma:field('tx-method'),observacoes:field('tx-notes')
+      };
+    });
+  });
+  refreshCatalog();
+})();
+</script>
