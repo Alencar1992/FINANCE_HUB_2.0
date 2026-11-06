@@ -181,7 +181,7 @@ function fhBuildDashboard_(tables, options) {
 
   var recent = fhEmpty_(tables, 'TRANSACOES').filter(function(row) {
     return fhISO_(row.DATA_COMPETENCIA).slice(0, 7) === month &&
-      !['CANCELADO','CANCELADA','ESTORNADO','ESTORNADA'].includes(fhUpper_(row.STATUS));
+      fhIsEffective_(row.STATUS);
   }).sort(function(a, b) {
     var left = fhISO_(a.DATA_COMPETENCIA), right = fhISO_(b.DATA_COMPETENCIA);
     return left < right ? 1 : left > right ? -1 : 0;
@@ -208,6 +208,7 @@ function fhBuildDashboard_(tables, options) {
       committedCents: committed,
       freeCents: balance - committed,
       activeAccounts: accounts.length,
+      totalObligations: obligations.length,
       pendingCount: obligations.filter(function(row) {
         return row.due <= endOfActiveMonth;
       }).length
