@@ -16,7 +16,7 @@ const baseAccount={
   aberturaCents:10000,dataAbertura:'2020-01-01'
 };
 const baseTransaction={
-  requestId,tipo:'ENTRADA',data:'2020-01-02',descricao:'Renda simulada',
+  requestId:'request_tx_abcdefgh123456789099',tipo:'ENTRADA',data:'2020-01-02',descricao:'Renda simulada',
   valorCents:1200,conta:'ACC_'+requestId,categoria:'cat_salario',
   forma:'forma_pix',estabelecimento:'',categoriaOutra:'',observacoes:''
 };
