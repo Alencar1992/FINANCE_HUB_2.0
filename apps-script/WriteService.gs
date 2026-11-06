@@ -158,7 +158,6 @@ function fh2cCreateEntity_(ss,table,id,requestId,normalized,row) {
   var existing=fh2cFind_(ss,table,id);
   if(existing){
     // Não reusar chave para payload diferente
-    var prev=String(existing.value.FH_FINGERPRINT||'');
     // A tabela não possui coluna de hash. Usamos o evento BEGIN para comparação.
     var intent=fh2cFind_(ss,'AUDITORIA','AUD_'+requestId+'_BEGIN');
     if(intent && String(intent.value.DEPOIS_HASH)!==digest)throw new Error('REQUEST_REUSED_DIFFERENTLY');
@@ -166,6 +165,10 @@ function fh2cCreateEntity_(ss,table,id,requestId,normalized,row) {
     fh2cAudit_(ss,'COMMIT',requestId,table,id,digest,at);
     return {id:id,status:'ALREADY_SAVED'};
   }
+  var prior=fh2cFind_(ss,'AUDITORIA','AUD_'+requestId+'_BEGIN');
+  var closed=fh2cFind_(ss,'AUDITORIA','AUD_'+requestId+'_COMMIT');
+  if(closed)throw new Error('RECONCILIATION_REQUIRED');
+  if(prior && String(prior.value.DEPOIS_HASH)!==digest)throw new Error('REQUEST_REUSED_DIFFERENTLY');
   fh2cAudit_(ss,'BEGIN',requestId,table,id,digest,at);
   fh2cAppend_(ss,table,row);
   fh2cAudit_(ss,'COMMIT',requestId,table,id,digest,at);
@@ -175,6 +178,8 @@ function saveHmlAccount(payload) {
   return fh2cRun_(function(ss){
     var p=fh2cAccount_(payload),id='ACC_'+p.requestId,at=new Date().toISOString();
     fh2cCheckClosed_(ss,p.dataAbertura);
+    var today=Utilities.formatDate(new Date(),'America/Sao_Paulo','yyyy-MM-dd');
+    if(p.dataAbertura>today)throw new Error('FUTURE_CASH_DATE');
     return fh2cCreateEntity_(ss,'CONTAS',id,p.requestId,p,{
       ID_CONTA:id,NOME:p.nome,INSTITUICAO:p.instituicao,TIPO:p.tipo,
       MOEDA:'BRL',SALDO_ABERTURA_CENTAVOS:p.aberturaCents,
@@ -221,6 +226,8 @@ function saveHmlTransaction(payload) {
     var existing=fh2cFind_(ss,'TRANSACOES',txId),movement=fh2cFind_(ss,'MOVIMENTOS_CONTA',mvId);
     var intent=fh2cFind_(ss,'AUDITORIA','AUD_'+p.requestId+'_BEGIN');
     if(intent && String(intent.value.DEPOIS_HASH)!==digest)throw new Error('REQUEST_REUSED_DIFFERENTLY');
+    if(!existing && !movement && fh2cFind_(ss,'AUDITORIA','AUD_'+p.requestId+'_COMMIT'))
+      throw new Error('RECONCILIATION_REQUIRED');
     if(existing||movement){
       if(!intent||!existing||!movement ||
         !fhIsEffective_(existing.value.STATUS)||!fhIsEffective_(movement.value.STATUS))
