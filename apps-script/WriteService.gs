@@ -53,6 +53,9 @@ function fh2cAppend_(ss,tab,values) {
   if(row>5001)throw new Error('ROW_LIMIT_EXCEEDED');
   if(row>sheet.getMaxRows())sheet.insertRowsAfter(sheet.getMaxRows(),Math.max(100,row-sheet.getMaxRows()));
   fields.forEach(function(field){if(!field)throw new Error('SCHEMA_VALIDATION_FAILED');});
+  Object.keys(values).forEach(function(field){
+    if(fields.indexOf(field)<0)throw new Error('SCHEMA_VALIDATION_FAILED');
+  });
   var output=fields.map(function(field){
     var value=values[field];
     return value===undefined||value===null?'':value;
@@ -153,6 +156,15 @@ function run2CReadinessTest() {
  * Se houver falha de auditoria após gravar a linha, um reenvio do MESMO requestId
  * pode recuperar a auditoria; nunca criar um cadastro duplicado.
  */
+function fh2cEntityConsistent_(table,stored,expected) {
+  if(table==='CONTAS')return stored.NOME===expected.nome && stored.INSTITUICAO===expected.instituicao &&
+    stored.TIPO===expected.tipo && Number(stored.SALDO_ABERTURA_CENTAVOS)===expected.aberturaCents;
+  if(table==='PESSOAS')return stored.NOME===expected.nome && stored.APELIDO===expected.apelido;
+  if(table==='CARTOES')return stored.NOME===expected.nome && stored.BANCO===expected.banco &&
+    stored.FINAL_4===expected.final4 && Number(stored.LIMITE_CENTAVOS)===expected.limiteCents &&
+    Number(stored.DIA_VENCIMENTO)===expected.vencimento;
+  return false;
+}
 function fh2cCreateEntity_(ss,table,id,requestId,normalized,row) {
   var digest=fh2cHash_(normalized),at=new Date().toISOString();
   var existing=fh2cFind_(ss,table,id);
@@ -161,7 +173,7 @@ function fh2cCreateEntity_(ss,table,id,requestId,normalized,row) {
     // A tabela não possui coluna de hash. Usamos o evento BEGIN para comparação.
     var intent=fh2cFind_(ss,'AUDITORIA','AUD_'+requestId+'_BEGIN');
     if(intent && String(intent.value.DEPOIS_HASH)!==digest)throw new Error('REQUEST_REUSED_DIFFERENTLY');
-    if(!intent)throw new Error('RECONCILIATION_REQUIRED');
+    if(!intent || !fh2cEntityConsistent_(table,existing.value,normalized))throw new Error('RECONCILIATION_REQUIRED');
     fh2cAudit_(ss,'COMMIT',requestId,table,id,digest,at);
     return {id:id,status:'ALREADY_SAVED'};
   }
@@ -230,7 +242,10 @@ function saveHmlTransaction(payload) {
       throw new Error('RECONCILIATION_REQUIRED');
     if(existing||movement){
       if(!intent||!existing||!movement ||
-        !fhIsEffective_(existing.value.STATUS)||!fhIsEffective_(movement.value.STATUS))
+        !fhIsEffective_(existing.value.STATUS)||!fhIsEffective_(movement.value.STATUS) ||
+        String(existing.value.ID_CONTA)!==p.conta || String(movement.value.ID_CONTA)!==p.conta ||
+        Number(existing.value.VALOR_CENTAVOS)!==p.valorCents ||
+        Number(movement.value.VALOR_ASSINADO_CENTAVOS)!==(p.tipo==='ENTRADA'?p.valorCents:-p.valorCents))
         throw new Error('RECONCILIATION_REQUIRED');
       fh2cAudit_(ss,'COMMIT',p.requestId,'TRANSACOES',txId,digest,at);
       return {status:'ALREADY_SAVED',id:txId};
