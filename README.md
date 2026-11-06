@@ -49,3 +49,11 @@ Os indicadores são derivados de \`CONTAS\`, \`MOVIMENTOS_CONTA\`, \`FATURAS\`, 
 Instruções: [Fase 2B — Dashboard Executivo](docs/FASE_2B_DASHBOARD.md)
 
 **A fase não contém cadastro, pagamento, criação de recorrências nem fechamento de mês.** O acesso via Web App permanece limitado ao proprietário.
+
+## Fase 2C.1 — Cadastros e lançamentos HML (em validação)
+
+Nova branch: `feat/phase-2c-hml-records`. Implementa **cadastro de contas, cartões e pessoas** e **entradas/saídas efetivadas à vista** no Executivo mobile, mas **não habilita gravação automaticamente**. A publicação/validação no Apps Script ainda depende de `clasp push` e dos testes no iPhone.
+
+Inclui travas, idempotência, auditoria, proteção de mês fechado e relatório de integridade. Compras no cartão, parcelamentos, faturas, recorrências e fechamento mensal não estão habilitados para escrita.
+
+**Leia antes de atualizar:** [Fase 2C — Instalação HML e testes](docs/FASE_2C_CADASTROS_HML.md).
