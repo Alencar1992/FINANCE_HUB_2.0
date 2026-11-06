@@ -1,0 +1,85 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <base target="_top">
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <style>
+    :root{color-scheme:dark;font-family:system-ui,-apple-system,Segoe UI,Arial,sans-serif}
+    *{box-sizing:border-box}
+    body{margin:0;background:#000;color:#fff;min-height:100dvh;padding:22px}
+    main{max-width:460px;margin:30px auto}
+    .brand{font-weight:800;letter-spacing:.5px;display:flex;align-items:center;gap:12px}
+    .logo{background:#1479f6;border-radius:14px;padding:12px}
+    h1{font-size:24px;margin:32px 0 8px}
+    p{color:#a5b0c4;line-height:1.55;font-size:14px}
+    .card{background:#11151c;border:1px solid #263143;border-radius:20px;padding:20px;margin:18px 0}
+    .state{font-weight:700;color:#93a3bd;font-size:18px}
+    .ok{color:#49d69b}.bad{color:#ff9696}
+    .line{display:flex;justify-content:space-between;gap:12px;margin-top:14px;color:#bac7d8;font-size:13px}
+    .line strong{color:#fff;text-align:right}
+    button{width:100%;padding:15px;background:#1479f6;border:0;border-radius:14px;color:white;font-size:15px;font-weight:700;cursor:pointer}
+    button:disabled{opacity:.65;cursor:wait}
+    .detail{color:#8da6c5;font-size:12px;overflow-wrap:anywhere;margin-top:16px}
+    .foot{font-size:12px;text-align:center;color:#70839d;margin-top:22px}
+  </style>
+</head>
+<body>
+  <main>
+    <div class="brand"><span class="logo">FH</span><span>FINANCE HUB 2.0</span></div>
+    <h1>Conexão com Google Sheets</h1>
+    <p>Diagnóstico de homologação. Esta tela confirma se o Apps Script consegue acessar a base e validar a estrutura, sem fazer lançamentos.</p>
+    <section class="card" aria-live="polite">
+      <div id="status" class="state">Aguardando teste…</div>
+      <div class="line"><span>Ambiente</span><strong>HML</strong></div>
+      <div class="line"><span>Permissão</span><strong>Somente leitura</strong></div>
+      <div class="line"><span>Abas validadas</span><strong id="tabs">—</strong></div>
+      <div class="line"><span>Versão do esquema</span><strong id="version">—</strong></div>
+      <div id="details" class="detail"></div>
+    </section>
+    <button id="retry" type="button">Verificar conexão</button>
+    <p class="foot">Nenhum dado financeiro é enviado ao navegador nesta etapa.</p>
+  </main>
+<script>
+(function(){
+  'use strict';
+  var status = document.getElementById('status');
+  var button = document.getElementById('retry');
+  var tabs = document.getElementById('tabs');
+  var version = document.getElementById('version');
+  var details = document.getElementById('details');
+  function render(result){
+    button.disabled = false;
+    status.textContent = result.ok ? 'Conexão validada ✓' : 'Verificação pendente';
+    status.className = 'state ' + (result.ok ? 'ok' : 'bad');
+    tabs.textContent = result.foundSheets === undefined ? '—' : result.foundSheets + ' / ' + result.expectedSheets;
+    version.textContent = result.schemaVersion || '—';
+    var problems = [];
+    if (result.status !== 'CONNECTION_OK') problems.push('Status: ' + (result.status || 'ERROR'));
+    if (result.missingSheets && result.missingSheets.length) problems.push('Abas ausentes: ' + result.missingSheets.join(', '));
+    if (result.missingColumns && result.missingColumns.length) problems.push('Colunas ausentes: ' + result.missingColumns.join(', '));
+    if (result.duplicateColumns && result.duplicateColumns.length) problems.push('Colunas repetidas: ' + result.duplicateColumns.join(', '));
+    if (result.timeZoneOk === false) problems.push('Fuso horário da planilha deve ser America/Sao_Paulo');
+    if (result.configOk === false) problems.push('Configuração HML ou versão do esquema inválida');
+    details.textContent = problems.join(' | ') || '32 abas conferidas e estrutura pronta para a próxima fase.';
+  }
+  function run(){
+    button.disabled = true;
+    status.className = 'state';
+    status.textContent = 'Conferindo…';
+    tabs.textContent = '—'; version.textContent = '—'; details.textContent = '';
+    if (!(window.google && google.script && google.script.run)) {
+      render({ok:false,status:'ABRIR_DENTRO_DO_APPS_SCRIPT'});
+      return;
+    }
+    google.script.run
+      .withSuccessHandler(render)
+      .withFailureHandler(function(){render({ok:false,status:'ERROR_CALLING_APPS_SCRIPT'});})
+      .getConnectionStatus();
+  }
+  button.addEventListener('click',run);
+  run();
+})();
+</script>
+</body>
+</html>
