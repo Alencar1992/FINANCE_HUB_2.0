@@ -1,0 +1,20 @@
+name: Validar conexão HML (estática)
+on:
+  pull_request:
+  push:
+    branches:
+      - feat/apps-script-sheets-hml
+
+permissions:
+  contents: read
+
+jobs:
+  static-checks:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Testes de estrutura e segurança
+        run: node --test tests/*.test.mjs
