@@ -90,7 +90,7 @@ function buildMock({enabled=true,failMovement=false}={}){
   let busy=false;
   const ctx={
     Date, Number, String, Error,
-    console:{warn(){}},
+    console:{warn(){},log(){}},
     PropertiesService:{getScriptProperties(){return {getProperty(k){return prop[k]||'';}}}},
     SpreadsheetApp:{openById(){return ss;},flush(){}},
     LockService:{getScriptLock(){return {tryLock(){if(busy)return false;busy=true;return true;},releaseLock(){busy=false;}}}},
@@ -218,4 +218,43 @@ test('diagnóstico de integridade identifica movimento pendente sem alterar cél
   const warning=ctx.fh2cIntegrity_();
   assert.equal(warning.status,'INTEGRITY_REVIEW_REQUIRED');
   assert.equal(warning.pendingTransactions,1);
+});
+
+test('verificação de recibo só confirma registro e auditoria completos',()=>{
+  const {ctx,sheets}=buildMock();
+  assert.equal(ctx.saveHmlAccount(baseAccount).status,'SAVED');
+  const verified=ctx.verifyHmlSaveReceipt('account',baseAccount.requestId);
+  assert.equal(verified.ok,true);
+  assert.equal(verified.status,'VERIFIED_IN_SHEETS');
+  assert.equal(verified.type,'account');
+  assert.equal(verified.environment,'HML');
+  const empty=ctx.verifyHmlSaveReceipt('account','request_nonexisting_abcdefgh123456');
+  assert.equal(empty.ok,false);
+  assert.equal(empty.status,'NOT_VERIFIED');
+  sheets.AUDITORIA.data.pop();
+  const broken=ctx.verifyHmlSaveReceipt('account',baseAccount.requestId);
+  assert.equal(broken.ok,false);
+  assert.equal(broken.status,'NOT_VERIFIED');
+});
+test('falha durante gravação mantém dados não confirmados, mesmo se linha surgiu',()=>{
+  const {ctx,sheets}=buildMock({failMovement:true});
+  ctx.saveHmlAccount(baseAccount);
+  const result=ctx.saveHmlTransaction(baseTransaction);
+  assert.equal(result.ok,false);
+  const receipt=ctx.verifyHmlSaveReceipt('transaction',baseTransaction.requestId);
+  assert.equal(receipt.ok,false);
+  assert.equal(receipt.status,'NOT_VERIFIED');
+  assert.equal(sheets.TRANSACOES.data.length,2);
+  assert.equal(sheets.MOVIMENTOS_CONTA.data.length,1);
+});
+test('UI só mostra confirmação após chamada independente ao recibo e preserva ID em falhas',()=>{
+  const forms=source('apps-script/Forms.html');
+  assert.match(forms,/verifyHmlSaveReceipt\(/);
+  assert.match(forms,/receipt\.status==='VERIFIED_IN_SHEETS'/);
+  assert.match(forms,/result\.verified===true/);
+  assert.match(forms,/FH2C_PENDING_REQUESTS/);
+  assert.match(forms,/blocked\[form\]=ids\[form\]/);
+  assert.match(forms,/if\(blocked\[form\]\)/);
+  assert.doesNotMatch(forms,/\[fn\]\(payload\)/);
+  assert.match(forms,/runner\.saveHmlAccount\(payload\)/);
 });

@@ -106,18 +106,88 @@ function fh2cOwnError_(error) {
   if(/^(INVALID|MISSING|UNSAFE)_([A-Z_]+)$/.test(msg))return msg;
   return 'WRITE_UNCERTAIN';
 }
-function fh2cRun_(task) {
+
+/**
+ * Recibo de gravação verificado por leitura independente.
+ * Não revela dados financeiros, nomes ou identificadores internos.
+ */
+function fh2cReceiptType_(type) {
+  var map={account:['CONTAS','ACC_'],card:['CARTOES','CARD_'],
+    person:['PESSOAS','PER_'],transaction:['TRANSACOES','TX_']};
+  if(!Object.prototype.hasOwnProperty.call(map,type))throw new Error('INVALID_RECEIPT_TYPE');
+  return map[type];
+}
+function fh2cReceiptFromSheet_(ss,type,requestId) {
+  var spec=fh2cReceiptType_(type),id=spec[1]+requestId;
+  var record=fh2cFind_(ss,spec[0],id);
+  var begin=fh2cFind_(ss,'AUDITORIA','AUD_'+requestId+'_BEGIN');
+  var commit=fh2cFind_(ss,'AUDITORIA','AUD_'+requestId+'_COMMIT');
+  var complete=!!record && !!begin && !!commit;
+  if(complete) {
+    complete=String(begin.value.TABELA)===spec[0] &&
+      String(commit.value.TABELA)===spec[0] &&
+      String(begin.value.ID_REGISTRO)===id &&
+      String(commit.value.ID_REGISTRO)===id &&
+      String(begin.value.DEPOIS_HASH)===String(commit.value.DEPOIS_HASH);
+  }
+  if(type==='transaction' && complete) {
+    var movement=fh2cFind_(ss,'MOVIMENTOS_CONTA','MOV_'+requestId);
+    complete=!!movement && fhIsEffective_(record.value.STATUS) &&
+      fhIsEffective_(movement.value.STATUS) &&
+      String(movement.value.ID_TRANSACAO)===id &&
+      String(movement.value.ID_CONTA)===String(record.value.ID_CONTA) &&
+      Number(movement.value.VALOR_ASSINADO_CENTAVOS)===
+        (String(record.value.TIPO)==='ENTRADA'?
+        Number(record.value.VALOR_CENTAVOS):-Number(record.value.VALOR_CENTAVOS));
+  }
+  return {ok:complete,status:complete?'VERIFIED_IN_SHEETS':'NOT_VERIFIED',
+    environment:'HML',type:type};
+}
+function fh2cLogOperation_(phase,type,requestId,status) {
+  // ID aleatório não é emitido integralmente no log; sem valores financeiros.
+  var fingerprint=fh2cHash_({requestId:requestId}).slice(0,12);
+  console.log('FINANCE_HUB_2C_OP '+JSON.stringify({
+    phase:phase,type:type,correlation:fingerprint,status:status,environment:'HML'
+  }));
+}
+/** RPC somente de leitura: segunda verificação separada da chamada de salvamento. */
+function verifyHmlSaveReceipt(type,requestId) {
   var lock;
   try {
-    if(!fh2cWritable_())throw new Error('WRITE_DISABLED');
+    fh2cReceiptType_(type);
+    fh2cId_(requestId);
     lock=fh2cLock_();
     var ctx=fh2cSetup_();
+    var receipt=fh2cReceiptFromSheet_(ctx.ss,type,requestId);
+    fh2cLogOperation_('INDEPENDENT_VERIFY',type,requestId,receipt.status);
+    return receipt;
+  }catch(error) {
+    console.warn('FINANCE_HUB_2C_VERIFY '+fh2cOwnError_(error));
+    return {ok:false,status:'VERIFY_UNAVAILABLE',environment:'HML'};
+  }finally {if(lock)lock.releaseLock();}
+}
+
+function fh2cRun_(type,task,payload) {
+  var lock;
+  var requestId=payload && typeof payload.requestId==='string' ? payload.requestId : '';
+  try {
+    if(!fh2cWritable_())throw new Error('WRITE_DISABLED');
+    fh2cId_(requestId);
+    lock=fh2cLock_();
+    var ctx=fh2cSetup_();
+    fh2cLogOperation_('ATTEMPT',type,requestId,'STARTED');
     var result=task(ctx.ss,ctx.config);
-    return {ok:true,status:result.status,id:result.id,environment:'HML'};
+    var receipt=fh2cReceiptFromSheet_(ctx.ss,type,requestId);
+    if(!receipt.ok)throw new Error('RECONCILIATION_REQUIRED');
+    fh2cLogOperation_('WRITE_VERIFIED',type,requestId,receipt.status);
+    return {ok:true,status:result.status,id:result.id,
+      verified:true,confirmation:'VERIFIED_IN_SHEETS',environment:'HML'};
   } catch(error) {
     var status=fh2cOwnError_(error);
-    console.warn('FINANCE_HUB_HML_2C '+status);
-    return {ok:false,status:status,environment:'HML'};
+    if(requestId && /^[A-Za-z0-9_-]{20,80}$/.test(requestId)) {
+      fh2cLogOperation_('STOPPED',type,requestId,status);
+    } else console.warn('FINANCE_HUB_HML_2C '+status);
+    return {ok:false,status:status,verified:false,environment:'HML'};
   } finally {
     if(lock)lock.releaseLock();
   }
@@ -187,7 +257,7 @@ function fh2cCreateEntity_(ss,table,id,requestId,normalized,row) {
   return {id:id,status:'SAVED'};
 }
 function saveHmlAccount(payload) {
-  return fh2cRun_(function(ss){
+  return fh2cRun_('account',function(ss){
     var p=fh2cAccount_(payload),id='ACC_'+p.requestId,at=new Date().toISOString();
     fh2cCheckClosed_(ss,p.dataAbertura);
     var today=Utilities.formatDate(new Date(),'America/Sao_Paulo','yyyy-MM-dd');
@@ -198,19 +268,19 @@ function saveHmlAccount(payload) {
       DATA_ABERTURA:p.dataAbertura,ATIVA:'SIM',
       CRIADO_EM:at,ATUALIZADO_EM:at,VERSAO:1
     });
-  });
+  },payload);
 }
 function saveHmlPerson(payload) {
-  return fh2cRun_(function(ss){
+  return fh2cRun_('person',function(ss){
     var p=fh2cPerson_(payload),id='PER_'+p.requestId,at=new Date().toISOString();
     return fh2cCreateEntity_(ss,'PESSOAS',id,p.requestId,p,{
       ID_PESSOA:id,NOME:p.nome,APELIDO:p.apelido,CONTATO:'',
       STATUS:'ATIVO',CRIADO_EM:at,ATUALIZADO_EM:at,VERSAO:1
     });
-  });
+  },payload);
 }
 function saveHmlCard(payload) {
-  return fh2cRun_(function(ss){
+  return fh2cRun_('card',function(ss){
     var p=fh2cCard_(payload),id='CARD_'+p.requestId,at=new Date().toISOString();
     if(p.contaPagadora&&!fh2cFind_(ss,'CONTAS',p.contaPagadora))throw new Error('UNKNOWN_ACCOUNT');
     return fh2cCreateEntity_(ss,'CARTOES',id,p.requestId,p,{
@@ -219,11 +289,11 @@ function saveHmlCard(payload) {
       ID_CONTA_PAGADORA:p.contaPagadora,COR_HEX:'#1479F6',LOGO_URL:'',
       ATIVO:'SIM',CRIADO_EM:at,ATUALIZADO_EM:at,VERSAO:1
     });
-  });
+  },payload);
 }
 /** Cria entrada/saída à vista, com registro de caixa e auditoria por etapas. */
 function saveHmlTransaction(payload) {
-  return fh2cRun_(function(ss){
+  return fh2cRun_('transaction',function(ss){
     var p=fh2cTransaction_(payload);
     var txId='TX_'+p.requestId,mvId='MOV_'+p.requestId;
     var today=Utilities.formatDate(new Date(),'America/Sao_Paulo','yyyy-MM-dd');
@@ -277,5 +347,5 @@ function saveHmlTransaction(payload) {
     fh2cUpdate_(ss,'MOVIMENTOS_CONTA',mov.row,'STATUS','EFETIVADO');
     fh2cAudit_(ss,'COMMIT',p.requestId,'TRANSACOES',txId,digest,at);
     return {status:'SAVED',id:txId};
-  });
+  },payload);
 }
