@@ -162,7 +162,8 @@
       setOptions('fh2c-tx-account',x.accounts,'Selecione a conta',function(a){return a.name+' · '+a.bank;});
       setOptions('fh2c-card-payer',x.accounts,'Nenhuma conta pagadora',function(a){return a.name+' · '+a.bank;});
       var payer=document.getElementById('fh2c-card-payer');payer.options[0].disabled=false;
-      layer.querySelectorAll('.fh2c-action').forEach(function(b){b.disabled=!x.writeEnabled||working;});
+      blockButtons();
+      restorePending();
       updateCats();
     }).withFailureHandler(function(){showStatus('Não foi possível consultar o Apps Script. Nenhuma gravação disponível.',false);}).getHmlCatalog();
   }
@@ -215,44 +216,120 @@
   var today=new Date().toLocaleDateString('sv-SE',{timeZone:'America/Sao_Paulo'});
   document.getElementById('fh2c-acc-date').value=today;
   document.getElementById('fh2c-tx-date').value=today;
+  // Bloqueio local: um pedido enviado nunca ganha outro ID sem reconciliação.
+  // Armazenar apenas ID opaco/status, sem dados financeiros no navegador.
+  var blocked={};
+  var recovered=false;
+  try {
+    var saved=window.sessionStorage.getItem('FH2C_PENDING_REQUESTS');
+    if(saved) {
+      var parsed=JSON.parse(saved);
+      ['account','person','card','transaction'].forEach(function(k){
+        if(parsed[k] && /^[A-Za-z0-9_-]{20,80}$/.test(parsed[k])) blocked[k]=parsed[k];
+      });
+      recovered=Object.keys(blocked).length>0;
+    }
+  }catch(_ignored){recovered=false;}
+  function persistBlocked(){
+    try {window.sessionStorage.setItem('FH2C_PENDING_REQUESTS',JSON.stringify(blocked));}
+    catch(_ignored){}
+  }
+  function lockForm(form,msg) {
+    var node=document.getElementById('fh2c-'+form);
+    var button=node.querySelector('.fh2c-action');
+    button.disabled=true;
+    document.getElementById('fh2c-'+form+'-msg').textContent=msg;
+  }
+  function restorePending(){
+    Object.keys(blocked).forEach(function(form){
+      lockForm(form,'Operação anterior pendente de verificação. Identificador: '+blocked[form]+
+        '. Não crie outro cadastro. Solicite reconciliação antes de tentar novamente.');
+    });
+  }
+  function blockButtons(){
+    layer.querySelectorAll('.fh2c-action').forEach(function(button){
+      var form=button.closest('form');
+      var key=form?form.id.replace('fh2c-',''):'';
+      button.disabled=working||!catalog.writeEnabled||!!blocked[key];
+    });
+  }
   function submit(form,event,fn,build) {
     event.preventDefault();
+    var output=document.getElementById('fh2c-'+form+'-msg');
     if(working||!catalog.writeEnabled)return;
-    var output=document.getElementById(form+'-msg');
+    if(blocked[form]) {
+      lockForm(form,'Operação bloqueada para reconciliação: '+blocked[form]);
+      return;
+    }
     var payload;
-    try{
+    try {
       if(!ids[form])ids[form]=id();
       payload=build();
       payload.requestId=ids[form];
     }catch(e){output.textContent=e.message;return;}
     working=true;
-    output.textContent='Registrando em homologação…';
-    layer.querySelectorAll('.fh2c-action').forEach(function(b){b.disabled=true;});
-    google.script.run.withSuccessHandler(function(result){
-      working=false;
-      if(result&&result.ok){
-        output.textContent=(result.status==='ALREADY_SAVED'?'Registro já existia; não foi duplicado.':'Registro confirmado na base HML.');
-        ids[form]='';
-        document.getElementById('fh2c-'+form).reset();
-        document.getElementById('fh2c-acc-date').value=today;
-        document.getElementById('fh2c-tx-date').value=today;
-        document.getElementById('fh2c-tx-type').value=currentPanel==='Saídas'?'SAIDA':'ENTRADA';
-        updateCats();
-        showExtras();
-        refreshCatalog();
-        if(typeof window.fhRefreshDashboard==='function')window.fhRefreshDashboard();
+    blocked[form]=ids[form];
+    persistBlocked();
+    output.textContent='Enviando registro para a HML… Referência: '+ids[form];
+    blockButtons();
+    var types={account:'account',person:'person',card:'card',transaction:'transaction'};
+    // A verificação é uma SEGUNDA chamada RPC, independente do save.
+    function verifyReceipt(){
+      output.textContent='Conferindo se o registro foi realmente salvo na planilha…';
+      google.script.run.withSuccessHandler(function(receipt){
+        working=false;
+        if(receipt && receipt.ok===true && receipt.status==='VERIFIED_IN_SHEETS' &&
+           receipt.type===types[form] && receipt.environment==='HML'){
+          delete blocked[form];
+          ids[form]='';
+          persistBlocked();
+          output.textContent='Registro confirmado na base HML após releitura da planilha.';
+          document.getElementById('fh2c-'+form).reset();
+          document.getElementById('fh2c-acc-date').value=today;
+          document.getElementById('fh2c-tx-date').value=today;
+          document.getElementById('fh2c-tx-type').value=currentPanel==='Saídas'?'SAIDA':'ENTRADA';
+          updateCats();showExtras();
+          refreshCatalog();
+          if(typeof window.fhRefreshDashboard==='function')window.fhRefreshDashboard();
+        }else{
+          lockForm(form,'Registro NÃO confirmado ('+(receipt&&receipt.status||'SEM_RESPOSTA')+
+            '). Referência: '+blocked[form]+'. Não repita nem gere outro ID; reconciliação necessária.');
+        }
+        blockButtons();
+      }).withFailureHandler(function(){
+        working=false;
+        lockForm(form,'Não foi possível verificar a planilha. Referência: '+blocked[form]+
+          '. Resultado incerto: reconciliação necessária.');
+        blockButtons();
+      }).verifyHmlSaveReceipt(types[form],ids[form]);
+    }
+    // Funções explícitas, sem indexação dinâmica de google.script.run.
+    function onSave(result) {
+      if(result&&result.ok===true&&result.verified===true &&
+         result.confirmation==='VERIFIED_IN_SHEETS'&&result.environment==='HML' &&
+         (result.status==='SAVED'||result.status==='ALREADY_SAVED')){
+        verifyReceipt();
       } else {
-        var code=result&&result.status||'ERRO_SEM_RESPOSTA';
-        output.textContent='Não confirmado: '+code+(code==='WRITE_UNCERTAIN'||code==='RECONCILIATION_REQUIRED'?
-          '. NÃO inicie novo lançamento; preserve o identificador e peça reconciliação.':'');
-        layer.querySelectorAll('.fh2c-action').forEach(function(b){b.disabled=!catalog.writeEnabled;});
+        working=false;
+        lockForm(form,'Salvamento NÃO confirmado ('+(result&&result.status||'RESPOSTA_INVALIDA')+
+          '). Referência: '+blocked[form]+'. Não refaça o registro antes de verificar a auditoria.');
+        blockButtons();
       }
-    }).withFailureHandler(function(){
+    }
+    function onFailure(){
       working=false;
-      output.textContent='Resultado incerto. Não faça outro lançamento com um novo identificador; verifique a auditoria primeiro.';
-      layer.querySelectorAll('.fh2c-action').forEach(function(b){b.disabled=!catalog.writeEnabled;});
-    })[fn](payload);
+      lockForm(form,'Falha de comunicação. Referência: '+blocked[form]+
+        '. Resultado incerto. Preserve este ID e não tente outro cadastro.');
+      blockButtons();
+    }
+    var runner=google.script.run.withSuccessHandler(onSave).withFailureHandler(onFailure);
+    if(fn==='saveHmlAccount')runner.saveHmlAccount(payload);
+    else if(fn==='saveHmlCard')runner.saveHmlCard(payload);
+    else if(fn==='saveHmlPerson')runner.saveHmlPerson(payload);
+    else if(fn==='saveHmlTransaction')runner.saveHmlTransaction(payload);
+    else onFailure();
   }
+  if(recovered) restorePending();
   document.getElementById('fh2c-account').addEventListener('submit',function(e){
     submit('account',e,'saveHmlAccount',function(){return {
       nome:field('acc-name'),instituicao:field('acc-bank'),tipo:field('acc-type'),
